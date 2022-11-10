@@ -4,46 +4,91 @@ new FormModel {
 	contentType: "form/swing"
 	root: new FormRoot {
 		add( new FormWindow( "javax.swing.JFrame", new FormLayoutManager( class com.jformdesigner.runtime.NullLayout ) ) {
-			name: "this2"
-			add( new FormComponent( "javax.swing.JTextField" ) {
-				name: "textField4"
-				"text": "UserName"
+			name: "this"
+			"resizable": false
+			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.jformdesigner.runtime.NullLayout ) ) {
+				name: "panel1"
+				add( new FormComponent( "javax.swing.JLabel" ) {
+					name: "logo"
+					"text": "로고자리"
+					"horizontalAlignment": 0
+				}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+					"x": 75
+					"y": 50
+					"width": 230
+					"height": 230
+				} )
+				add( new FormComponent( "javax.swing.JTextField" ) {
+					name: "name"
+				}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+					"x": 160
+					"y": 320
+					"width": 155
+					"height": 30
+				} )
+				add( new FormComponent( "javax.swing.JTextField" ) {
+					name: "ip"
+					"text": "127.0.0.1"
+				}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+					"width": 155
+					"height": 30
+					"x": 160
+					"y": 370
+				} )
+				add( new FormComponent( "javax.swing.JTextField" ) {
+					name: "port"
+					"text": "30000"
+				}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+					"width": 155
+					"height": 30
+					"x": 160
+					"y": 420
+				} )
+				add( new FormComponent( "javax.swing.JButton" ) {
+					name: "connect"
+					"text": "Connect"
+				}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+					"x": 140
+					"y": 490
+					"width": 100
+					"height": 30
+				} )
+				add( new FormComponent( "javax.swing.JLabel" ) {
+					name: "userName"
+					"text": "User Name"
+				}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+					"x": 75
+					"y": 324
+					"width": 80
+					"height": 20
+				} )
+				add( new FormComponent( "javax.swing.JLabel" ) {
+					name: "ipAddress"
+					"text": "IP Address"
+				}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+					"x": 75
+					"y": 373
+					"width": 80
+					"height": 20
+				} )
+				add( new FormComponent( "javax.swing.JLabel" ) {
+					name: "portNumber"
+					"text": "Port Number"
+				}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+					"x": 75
+					"y": 423
+					"height": 20
+					"width": 80
+				} )
 			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
-				"width": 185
-				"height": 30
-				"x": 90
-				"y": 285
-			} )
-			add( new FormComponent( "javax.swing.JTextField" ) {
-				name: "textField5"
-				"text": "IP Address"
-			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
-				"width": 185
-				"height": 30
-				"x": 90
-				"y": 325
-			} )
-			add( new FormComponent( "javax.swing.JTextField" ) {
-				name: "textField6"
-				"text": "Port Number"
-			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
-				"width": 185
-				"height": 30
-				"x": 90
-				"y": 365
-			} )
-			add( new FormComponent( "javax.swing.JButton" ) {
-				name: "connect2"
-				"text": "Connect"
-			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
-				"width": 79
-				"height": 30
-				"x": 140
-				"y": 435
+				"x": 0
+				"y": 0
+				"width": 385
+				"height": 572
 			} )
 		}, new FormLayoutConstraints( null ) {
-			"size": new java.awt.Dimension( 370, 580 )
-			"location": new java.awt.Point( 0, 5 )
+			"size": new java.awt.Dimension( 385, 602 )
+			"location": new java.awt.Point( 5, 5 )
 		} )
 	}
 }

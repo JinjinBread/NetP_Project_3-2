@@ -1,7 +1,9 @@
-import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.*;
 /*
- * Created by JFormDesigner on Wed Nov 09 00:12:57 KST 2022
+ * Created by JFormDesigner on Thu Nov 10 23:43:53 KST 2022
  */
 
 
@@ -10,68 +12,142 @@ import java.awt.*;
  * @author unknown
  */
 public class ChatClientMain extends JFrame {
+    public static void main(String[] args) {
+        EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                try {
+                    ChatClientMain frame = new ChatClientMain();
+                    frame.setVisible(true);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
     public ChatClientMain() {
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         initComponents();
+        Myaction action = new Myaction();
+        connect.addActionListener(action);
     }
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents  @formatter:off
-        this2 = new JFrame();
-        textField4 = new JTextField();
-        textField5 = new JTextField();
-        textField6 = new JTextField();
-        connect2 = new JButton();
+        panel1 = new JPanel();
+        logo = new JLabel();
+        name = new JTextField();
+        ip = new JTextField();
+        port = new JTextField();
+        connect = new JButton();
+        userName = new JLabel();
+        ipAddress = new JLabel();
+        portNumber = new JLabel();
 
-        //======== this2 ========
+        //======== this ========
+        setResizable(false);
+        var contentPane = getContentPane();
+        contentPane.setLayout(null);
+
+        //======== panel1 ========
         {
-            var this2ContentPane = this2.getContentPane();
-            this2ContentPane.setLayout(null);
+            panel1.setLayout(null);
 
-            //---- textField4 ----
-            textField4.setText("UserName");
-            this2ContentPane.add(textField4);
-            textField4.setBounds(90, 285, 185, 30);
+            //---- logo ----
+            logo.setText("\ub85c\uace0\uc790\ub9ac");
+            logo.setHorizontalAlignment(SwingConstants.CENTER);
+            panel1.add(logo);
+            logo.setBounds(75, 50, 230, 230);
+            panel1.add(name);
+            name.setBounds(160, 320, 155, 30);
 
-            //---- textField5 ----
-            textField5.setText("IP Address");
-            this2ContentPane.add(textField5);
-            textField5.setBounds(90, 325, 185, 30);
+            //---- ip ----
+            ip.setText("127.0.0.1");
+            panel1.add(ip);
+            ip.setBounds(160, 370, 155, 30);
 
-            //---- textField6 ----
-            textField6.setText("Port Number");
-            this2ContentPane.add(textField6);
-            textField6.setBounds(90, 365, 185, 30);
+            //---- port ----
+            port.setText("30000");
+            panel1.add(port);
+            port.setBounds(160, 420, 155, 30);
 
-            //---- connect2 ----
-            connect2.setText("Connect");
-            this2ContentPane.add(connect2);
-            connect2.setBounds(140, 435, 79, 30);
+            //---- connect ----
+            connect.setText("Connect");
+            panel1.add(connect);
+            connect.setBounds(140, 490, 100, 30);
+
+            //---- userName ----
+            userName.setText("User Name");
+            panel1.add(userName);
+            userName.setBounds(75, 324, 80, 20);
+
+            //---- ipAddress ----
+            ipAddress.setText("IP Address");
+            panel1.add(ipAddress);
+            ipAddress.setBounds(75, 373, 80, 20);
+
+            //---- portNumber ----
+            portNumber.setText("Port Number");
+            panel1.add(portNumber);
+            portNumber.setBounds(75, 423, 80, 20);
 
             {
                 // compute preferred size
                 Dimension preferredSize = new Dimension();
-                for(int i = 0; i < this2ContentPane.getComponentCount(); i++) {
-                    Rectangle bounds = this2ContentPane.getComponent(i).getBounds();
+                for(int i = 0; i < panel1.getComponentCount(); i++) {
+                    Rectangle bounds = panel1.getComponent(i).getBounds();
                     preferredSize.width = Math.max(bounds.x + bounds.width, preferredSize.width);
                     preferredSize.height = Math.max(bounds.y + bounds.height, preferredSize.height);
                 }
-                Insets insets = this2ContentPane.getInsets();
+                Insets insets = panel1.getInsets();
                 preferredSize.width += insets.right;
                 preferredSize.height += insets.bottom;
-                this2ContentPane.setMinimumSize(preferredSize);
-                this2ContentPane.setPreferredSize(preferredSize);
+                panel1.setMinimumSize(preferredSize);
+                panel1.setPreferredSize(preferredSize);
             }
-            this2.pack();
-            this2.setLocationRelativeTo(this2.getOwner());
         }
+        contentPane.add(panel1);
+        panel1.setBounds(0, 0, 385, 572);
+
+        {
+            // compute preferred size
+            Dimension preferredSize = new Dimension();
+            for(int i = 0; i < contentPane.getComponentCount(); i++) {
+                Rectangle bounds = contentPane.getComponent(i).getBounds();
+                preferredSize.width = Math.max(bounds.x + bounds.width, preferredSize.width);
+                preferredSize.height = Math.max(bounds.y + bounds.height, preferredSize.height);
+            }
+            Insets insets = contentPane.getInsets();
+            preferredSize.width += insets.right;
+            preferredSize.height += insets.bottom;
+            contentPane.setMinimumSize(preferredSize);
+            contentPane.setPreferredSize(preferredSize);
+        }
+        pack();
+        setLocationRelativeTo(getOwner());
         // JFormDesigner - End of component initialization  //GEN-END:initComponents  @formatter:on
     }
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables  @formatter:off
-    private JFrame this2;
-    private JTextField textField4;
-    private JTextField textField5;
-    private JTextField textField6;
-    private JButton connect2;
+    private JPanel panel1;
+    private JLabel logo;
+    private JTextField name;
+    private JTextField ip;
+    private JTextField port;
+    private JButton connect;
+    private JLabel userName;
+    private JLabel ipAddress;
+    private JLabel portNumber;
     // JFormDesigner - End of variables declaration  //GEN-END:variables  @formatter:on
+
+    class Myaction implements ActionListener // 내부클래스로 액션 이벤트 처리 클래스
+    {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            String username = name.getText().trim();
+            String ip_addr = ip.getText().trim();
+            String port_no = port.getText().trim();
+            ChatClientView view = new ChatClientView(username, ip_addr, port_no);
+            setVisible(false);
+        }
+    }
 }
