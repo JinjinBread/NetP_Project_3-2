@@ -1,0 +1,60 @@
+JFDML JFormDesigner: "8.0.0.0.194" Java: "17.0.3" encoding: "UTF-8"
+
+new FormModel {
+	contentType: "form/swing"
+	root: new FormRoot {
+		add( new FormWindow( "javax.swing.JFrame", new FormLayoutManager( class com.jformdesigner.runtime.NullLayout ) ) {
+			name: "this"
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "label1"
+				"text": "IP"
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+				"x": 60
+				"y": 355
+			} )
+			add( new FormComponent( "javax.swing.JTextField" ) {
+				name: "ip"
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+				"width": 150
+				"height": 30
+				"x": 145
+				"y": 350
+			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "label2"
+				"text": "Port Number"
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+				"width": 80
+				"height": 17
+				"x": 60
+				"y": 410
+			} )
+			add( new FormComponent( "javax.swing.JTextField" ) {
+				name: "port"
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+				"width": 150
+				"height": 30
+				"x": 145
+				"y": 405
+			} )
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "startBtn"
+				"text": "Server Start"
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+				"x": 130
+				"y": 485
+			} )
+			add( new FormContainer( "javax.swing.JScrollPane", new FormLayoutManager( class javax.swing.JScrollPane ) ) {
+				name: "scrollPane1"
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+				"x": 20
+				"y": 20
+				"width": 325
+				"height": 305
+			} )
+		}, new FormLayoutConstraints( null ) {
+			"size": new java.awt.Dimension( 370, 580 )
+			"location": new java.awt.Point( 0, 5 )
+		} )
+	}
+}
