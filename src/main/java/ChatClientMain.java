@@ -1,6 +1,7 @@
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.Serial;
 import javax.swing.*;
 /*
  * Created by JFormDesigner on Thu Nov 10 23:43:53 KST 2022
@@ -12,6 +13,8 @@ import javax.swing.*;
  * @author unknown
  */
 public class ChatClientMain extends JFrame {
+    @Serial
+    private static final long serialVersionUID = 1L;
     public static void main(String[] args) {
         EventQueue.invokeLater(new Runnable() {
             public void run() {
@@ -27,8 +30,11 @@ public class ChatClientMain extends JFrame {
     public ChatClientMain() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         initComponents();
-        Myaction action = new Myaction();
+        MyAction action = new MyAction();
         connect.addActionListener(action);
+        name.addActionListener(action);
+        ip.addActionListener(action);
+        port.addActionListener(action);
     }
 
     private void initComponents() {
@@ -139,14 +145,14 @@ public class ChatClientMain extends JFrame {
     private JLabel portNumber;
     // JFormDesigner - End of variables declaration  //GEN-END:variables  @formatter:on
 
-    class Myaction implements ActionListener // 내부클래스로 액션 이벤트 처리 클래스
+    class MyAction implements ActionListener // 내부클래스로 액션 이벤트 처리 클래스
     {
         @Override
         public void actionPerformed(ActionEvent e) {
             String username = name.getText().trim();
             String ip_addr = ip.getText().trim();
             String port_no = port.getText().trim();
-            ChatClientView view = new ChatClientView(username, ip_addr, port_no);
+            ChatClientChatRoom view = new ChatClientChatRoom(username, ip_addr, port_no);
             setVisible(false);
         }
     }

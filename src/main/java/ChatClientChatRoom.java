@@ -1,11 +1,12 @@
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.Socket;
-import javax.swing.border.*;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 /*
  * Created by JFormDesigner on Wed Nov 09 00:40:15 KST 2022
  */
@@ -15,7 +16,10 @@ import javax.swing.border.*;
 /**
  * @author unknown
  */
-public class ChatClientView extends JFrame {
+public class ChatClientChatRoom extends JFrame {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     private static final int BUF_LEN = 128;
     private String UserName;
     private Socket socket;
@@ -23,7 +27,7 @@ public class ChatClientView extends JFrame {
     private ObjectOutputStream oos;
     private FileDialog fd;
 
-    public ChatClientView(String name, String ip, String port) {
+    public ChatClientChatRoom(String name, String ip, String port) {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
         initComponents();
@@ -31,7 +35,7 @@ public class ChatClientView extends JFrame {
         listBtn.setContentAreaFilled(false); emoticonBtn.setContentAreaFilled(false); fileBtn.setContentAreaFilled(false);
         listBtn.setFocusPainted(false); emoticonBtn.setFocusPainted(false); fileBtn.setFocusPainted(false);
 
-        AppendText("User " + name + " connecting " + ip + " " + port);
+        AppendTextL("User " + name + " connecting " + ip + " " + port);
         UserName = name;
 
         try {
@@ -42,13 +46,13 @@ public class ChatClientView extends JFrame {
             ois = new ObjectInputStream(socket.getInputStream());
 
             ChatObject obcm = new ChatObject(UserName, "100", "Hello");
-            SendChatMsg(obcm);
+            SendObject(obcm);
 
             ListenNetwork net = new ListenNetwork();
             net.start();
             TextSendAction action = new TextSendAction();
             sendBtn.addActionListener(action);
-            txtInput.addActionListener(action);
+            txtInput.addActionListener(action); // Enter로도 event 받기 위해
             txtInput.requestFocus();
             ImageSendAction action2 = new ImageSendAction();
             fileBtn.addActionListener(action2);
@@ -56,85 +60,156 @@ public class ChatClientView extends JFrame {
         } catch (NumberFormatException | IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-            //AppendText("connect error");
+            AppendTextL("connect error");
         }
-    }
-
-    public ChatObject ReadChatMsg() {
-        Object obj = null;
-        String msg = null;
-        ChatObject cm = new ChatObject("", "", "");
-        // Android와 호환성을 위해 각각의 Field를 따로따로 읽는다.
-
-        try {
-            obj = ois.readObject();
-            cm.code = (String) obj;
-            obj = ois.readObject();
-            cm.UserName = (String) obj;
-            obj = ois.readObject();
-            cm.data = (String) obj;
-            if (cm.code.equals("300")) {
-                obj = ois.readObject();
-                cm.imgbytes = (byte[]) obj;
-            }
-        } catch (ClassNotFoundException | IOException e) {
-            // TODO Auto-generated catch block
-            AppendText("ReadChatMsg Error");
-            e.printStackTrace();
-            try {
-                oos.close();
-                socket.close();
-                ois.close();
-                socket = null;
-                return null;
-            } catch (IOException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
-                try {
-                    oos.close();
-                    socket.close();
-                    ois.close();
-                } catch (IOException e2) {
-                    // TODO Auto-generated catch block
-                    e2.printStackTrace();
-                }
-
-                socket = null;
-                return null;
-            }
-
-            // textArea.append("메세지 송신 에러!!\n");
-            // System.exit(0);
-        }
-
-
-        return cm;
     }
     class ListenNetwork extends Thread {
         public void run() {
             while (true) {
-                ChatObject cm = ReadChatMsg();
-                if (cm==null)
-                    break;
-                if (socket == null)
-                    break;
-                String msg;
-                msg = String.format("[%s] %s", cm.UserName, cm.data);
-                switch (cm.code) {
-                    case "200": // chat message
-                        AppendText(msg);
+                try {
+
+                    Object obcm = null;
+                    String msg = null;
+                    ChatObject cm;
+                    try {
+                        obcm = ois.readObject();
+                    } catch (ClassNotFoundException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
                         break;
-                    case "300": // Image 첨부
-                        AppendText("[" + cm.UserName + "]" + " " + cm.data);
-                        //AppendImage(cm.img);
-                        AppendImageBytes(cm.imgbytes);
+                    }
+                    if (obcm == null)
+                        break;
+                    if (obcm instanceof ChatObject) {
+                        cm = (ChatObject) obcm;
+                        msg = String.format("[%s]\n%s", cm.UserName, cm.data);
+                    } else
+                        continue;
+                    switch (cm.code) {
+                        case "200": // chat message
+                            if (cm.UserName.equals(UserName))
+                                AppendTextR(msg); // 내 메세지는 우측에
+                            else
+                                AppendTextL(msg);
+                            break;
+                        case "300": // Image 첨부
+                            if (cm.UserName.equals(UserName))
+                                AppendTextR("[" + cm.UserName + "]");
+                            else
+                                AppendTextL("[" + cm.UserName + "]");
+                            AppendImage(cm.img);
+                            break;
+//                        case "500": // Mouse Event 수신
+//                            DoMouseEvent(cm);
+//                            break;
+                    }
+                } catch (IOException e) {
+                    AppendTextL("ois.readObject() error");
+                    try {
+                        ois.close();
+                        oos.close();
+                        socket.close();
 
                         break;
-                }
+                    } catch (Exception ee) {
+                        break;
+                    } // catch문 끝
+                } // 바깥 catch문끝
 
             }
         }
     }
+
+    // Mouse Event 수신 처리
+//    public void DoMouseEvent(ChatMsg cm) {
+//        Color c;
+//        if (cm.UserName.matches(UserName)) // 본인 것은 이미 Local 로 그렸다.
+//            return;
+//        c = new Color(255, 0, 0); // 다른 사람 것은 Red
+//        gc2.setColor(c);
+//        gc2.fillOval(cm.mouse_e.getX() - pen_size/2, cm.mouse_e.getY() - cm.pen_size/2, cm.pen_size, cm.pen_size);
+//        gc.drawImage(panelImage, 0, 0, panel);
+//    }
+//
+//    public void SendMouseEvent(MouseEvent e) {
+//        ChatMsg cm = new ChatMsg(UserName, "500", "MOUSE");
+//        cm.mouse_e = e;
+//        cm.pen_size = pen_size;
+//        SendObject(cm);
+//    }
+//
+//    class MyMouseWheelEvent implements MouseWheelListener {
+//        @Override
+//        public void mouseWheelMoved(MouseWheelEvent e) {
+//            // TODO Auto-generated method stub
+//            if (e.getWheelRotation() < 0) { // 위로 올리는 경우 pen_size 증가
+//                if (pen_size < 20)
+//                    pen_size++;
+//            } else {
+//                if (pen_size > 2)
+//                    pen_size--;
+//            }
+//            lblMouseEvent.setText("mouseWheelMoved Rotation=" + e.getWheelRotation()
+//                    + " pen_size = " + pen_size + " " + e.getX() + "," + e.getY());
+//
+//        }
+//
+//    }
+//    // Mouse Event Handler
+//    class MyMouseEvent implements MouseListener, MouseMotionListener {
+//        @Override
+//        public void mouseDragged(MouseEvent e) {
+//            lblMouseEvent.setText(e.getButton() + " mouseDragged " + e.getX() + "," + e.getY());// 좌표출력가능
+//            Color c = new Color(0,0,255);
+//            gc2.setColor(c);
+//            gc2.fillOval(e.getX()-pen_size/2, e.getY()-pen_size/2, pen_size, pen_size);
+//            // panelImnage는 paint()에서 이용한다.
+//            gc.drawImage(panelImage, 0, 0, panel);
+//            SendMouseEvent(e);
+//        }
+//
+//        @Override
+//        public void mouseMoved(MouseEvent e) {
+//            lblMouseEvent.setText(e.getButton() + " mouseMoved " + e.getX() + "," + e.getY());
+//        }
+//
+//        @Override
+//        public void mouseClicked(MouseEvent e) {
+//            lblMouseEvent.setText(e.getButton() + " mouseClicked " + e.getX() + "," + e.getY());
+//            Color c = new Color(0,0,255);
+//            gc2.setColor(c);
+//            gc2.fillOval(e.getX()-pen_size/2, e.getY()-pen_size/2, pen_size, pen_size);
+//            gc.drawImage(panelImage, 0, 0, panel);
+//            SendMouseEvent(e);
+//        }
+//
+//        @Override
+//        public void mouseEntered(MouseEvent e) {
+//            lblMouseEvent.setText(e.getButton() + " mouseEntered " + e.getX() + "," + e.getY());
+//            // panel.setBackground(Color.YELLOW);
+//
+//        }
+//
+//        @Override
+//        public void mouseExited(MouseEvent e) {
+//            lblMouseEvent.setText(e.getButton() + " mouseExited " + e.getX() + "," + e.getY());
+//            // panel.setBackground(Color.CYAN);
+//
+//        }
+//
+//        @Override
+//        public void mousePressed(MouseEvent e) {
+//            lblMouseEvent.setText(e.getButton() + " mousePressed " + e.getX() + "," + e.getY());
+//
+//        }
+//
+//        @Override
+//        public void mouseReleased(MouseEvent e) {
+//            lblMouseEvent.setText(e.getButton() + " mouseReleased " + e.getX() + "," + e.getY());
+//            // 드래그중 멈출시 보임
+//
+//        }
+//    }
 
     // keyboard enter key 치면 서버로 전송
     class TextSendAction implements ActionListener {
@@ -159,66 +234,81 @@ public class ChatClientView extends JFrame {
         public void actionPerformed(ActionEvent e) {
             // 액션 이벤트가 sendBtn일때 또는 textField 에세 Enter key 치면
             if (e.getSource() == fileBtn) {
-                JFrame frame = new JFrame("이미지첨부");
+                Frame frame = new Frame("이미지첨부");
                 fd = new FileDialog(frame, "이미지 선택", FileDialog.LOAD);
+                // frame.setVisible(true);
+                // fd.setDirectory(".\\");
                 fd.setVisible(true);
                 // System.out.println(fd.getDirectory() + fd.getFile());
                 if (fd.getDirectory().length() > 0 && fd.getFile().length() > 0) {
-                    ChatObject obcm = new ChatObject(UserName, "300", fd.getFile());
-//					ImageIcon img = new ImageIcon(fd.getDirectory() + fd.getFile());
-//					obcm.img = img;
-//					SendChatMsg(obcm);
-
-                    BufferedImage bImage = null;
-                    String filename = fd.getDirectory() + fd.getFile();
-                    try {
-                        bImage = ImageIO.read(new File(filename));
-                    } catch (IOException e2) {
-                        // TODO Auto-generated catch block
-                        e2.printStackTrace();
-                    }
-                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                    try {
-                        ImageIO.write(bImage, "jpg", bos);
-                        byte[] data = bos.toByteArray();
-                        bos.close();
-                        obcm.imgbytes = data;
-                        //AppendImageBytes(data);
-
-                    } catch (IOException e1) {
-                        // TODO Auto-generated catch block
-                        e1.printStackTrace();
-                    }
-                    SendChatMsg(obcm);
+                    ChatObject obcm = new ChatObject(UserName, "300", "IMG");
+                    ImageIcon img = new ImageIcon(fd.getDirectory() + fd.getFile());
+                    obcm.img = img;
+                    SendObject(obcm);
                 }
             }
         }
     }
 
-    ImageIcon icon1 = new ImageIcon("src/icon1.jpg");
-
-    public void AppendIcon(ImageIcon icon) {
-        int len = textArea.getDocument().getLength();
-        // 끝으로 이동
-        textArea.setCaretPosition(len);
-        textArea.insertIcon(icon);
-    }
+    // 프로필
+//    ImageIcon icon1 = new ImageIcon("src/icon1.jpg");
+//
+//    public void AppendIcon(ImageIcon icon) {
+//        int len = textArea.getDocument().getLength();
+//        // 끝으로 이동
+//        textArea.setCaretPosition(len);
+//        textArea.insertIcon(icon);
+//    }
 
     // 화면에 출력
-    public void AppendText(String msg) {
+    public void AppendTextL(String msg) {
         // textArea.append(msg + "\n");
         // AppendIcon(icon1);
         msg = msg.trim(); // 앞뒤 blank와 \n을 제거한다.
+
+        StyledDocument doc = textArea.getStyledDocument();
+        SimpleAttributeSet left = new SimpleAttributeSet();
+        StyleConstants.setAlignment(left, StyleConstants.ALIGN_LEFT);
+        StyleConstants.setForeground(left, Color.BLACK);
+        doc.setParagraphAttributes(doc.getLength(), 1, left, false);
+        try {
+            doc.insertString(doc.getLength(), msg+"\n", left );
+        } catch (BadLocationException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         int len = textArea.getDocument().getLength();
-        // 끝으로 이동
         textArea.setCaretPosition(len);
-        textArea.replaceSelection(msg + "\n");
+        //textArea.replaceSelection("\n");
+
+
+    }
+    // 화면 우측에 출력
+    public void AppendTextR(String msg) {
+        msg = msg.trim(); // 앞뒤 blank와 \n을 제거한다.
+        StyledDocument doc = textArea.getStyledDocument();
+        SimpleAttributeSet right = new SimpleAttributeSet();
+        StyleConstants.setAlignment(right, StyleConstants.ALIGN_RIGHT);
+        StyleConstants.setForeground(right, Color.BLUE);
+        doc.setParagraphAttributes(doc.getLength(), 1, right, false);
+        try {
+            doc.insertString(doc.getLength(),msg+"\n", right );
+        } catch (BadLocationException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        int len = textArea.getDocument().getLength();
+        textArea.setCaretPosition(len);
+        //textArea.replaceSelection("\n");
+
     }
 
     public void AppendImage(ImageIcon ori_icon) {
         int len = textArea.getDocument().getLength();
         textArea.setCaretPosition(len); // place caret at the end (with no selection)
         Image ori_img = ori_icon.getImage();
+        Image new_img;
+        ImageIcon new_icon;
         int width, height;
         double ratio;
         width = ori_icon.getIconWidth();
@@ -234,30 +324,22 @@ public class ChatClientView extends JFrame {
                 height = 200;
                 width = (int) (height * ratio);
             }
-            Image new_img = ori_img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
-            ImageIcon new_icon = new ImageIcon(new_img);
+            new_img = ori_img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+            new_icon = new ImageIcon(new_img);
             textArea.insertIcon(new_icon);
-
-        } else
+        } else {
             textArea.insertIcon(ori_icon);
+            new_img = ori_img;
+        }
         len = textArea.getDocument().getLength();
         textArea.setCaretPosition(len);
         textArea.replaceSelection("\n");
-    }
+        // ImageViewAction viewaction = new ImageViewAction();
+        // new_icon.addActionListener(viewaction); // 내부클래스로 액션 리스너를 상속받은 클래스로
+        // panelImage = ori_img.getScaledInstance(panel.getWidth(), panel.getHeight(), Image.SCALE_DEFAULT);
 
-    public void AppendImageBytes(byte[] imgbytes) {
-        ByteArrayInputStream bis = new ByteArrayInputStream(imgbytes);
-        BufferedImage ori_img = null;
-        try {
-            ori_img = ImageIO.read(bis);
-            bis.close();
-
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        ImageIcon new_icon = new ImageIcon(ori_img);
-        AppendImage(new_icon);
+//        gc2.drawImage(ori_img,  0,  0, panel.getWidth(), panel.getHeight(), panel);
+//        gc.drawImage(panelImage, 0, 0, panel.getWidth(), panel.getHeight(), panel);
     }
 
     // Windows 처럼 message 제외한 나머지 부분은 NULL 로 만들기 위한 함수
@@ -281,35 +363,33 @@ public class ChatClientView extends JFrame {
 
     // Server에게 network으로 전송
     public void SendMessage(String msg) {
-        ChatObject obcm = new ChatObject(UserName, "200", msg);
-        SendChatMsg(obcm);
-    }
-
-    // 하나의 Message 보내는 함수
-    // Android와 호환성을 위해 code, UserName, data 모드 각각 전송한다.
-    public void SendChatMsg(ChatObject obj) {
         try {
-            oos.writeObject(obj.code);
-            oos.writeObject(obj.UserName);
-            oos.writeObject(obj.data);
-            if (obj.code.equals("300")) { // 이미지 첨부 있는 경우
-                oos.writeObject(obj.imgbytes);
-            }
-            oos.flush();
+            // dos.writeUTF(msg);
+//			byte[] bb;
+//			bb = MakePacket(msg);
+//			dos.write(bb, 0, bb.length);
+            ChatObject obcm = new ChatObject(UserName, "200", msg);
+            oos.writeObject(obcm);
         } catch (IOException e) {
-            AppendText("SendChatMsg Error");
-            e.printStackTrace();
+            AppendTextL("oos.writeObject() error");
             try {
+                ois.close();
                 oos.close();
                 socket.close();
-                ois.close();
             } catch (IOException e1) {
                 // TODO Auto-generated catch block
                 e1.printStackTrace();
+                System.exit(0);
             }
+        }
+    }
 
+    public void SendObject(Object ob) { // 서버로 메세지를 보내는 메소드
+        try {
+            oos.writeObject(ob);
+        } catch (IOException e) {
             // textArea.append("메세지 송신 에러!!\n");
-            // System.exit(0);
+            AppendTextL("SendObject Error");
         }
     }
 
@@ -352,11 +432,11 @@ public class ChatClientView extends JFrame {
             listBtn.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseEntered(MouseEvent e) {
-                    ChatClientView.this.mouseEntered(e);
+                    ChatClientChatRoom.this.mouseEntered(e);
                 }
                 @Override
                 public void mouseExited(MouseEvent e) {
-                    ChatClientView.this.mouseExited(e);
+                    ChatClientChatRoom.this.mouseExited(e);
                 }
             });
             panel1.add(listBtn);
@@ -410,11 +490,11 @@ public class ChatClientView extends JFrame {
             fileBtn.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseEntered(MouseEvent e) {
-                    ChatClientView.this.mouseEntered(e);
+                    ChatClientChatRoom.this.mouseEntered(e);
                 }
                 @Override
                 public void mouseExited(MouseEvent e) {
-                    ChatClientView.this.mouseExited(e);
+                    ChatClientChatRoom.this.mouseExited(e);
                 }
             });
             panel2.add(fileBtn);
@@ -426,11 +506,11 @@ public class ChatClientView extends JFrame {
             emoticonBtn.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseEntered(MouseEvent e) {
-                    ChatClientView.this.mouseEntered(e);
+                    ChatClientChatRoom.this.mouseEntered(e);
                 }
                 @Override
                 public void mouseExited(MouseEvent e) {
-                    ChatClientView.this.mouseExited(e);
+                    ChatClientChatRoom.this.mouseExited(e);
                 }
             });
             panel2.add(emoticonBtn);
