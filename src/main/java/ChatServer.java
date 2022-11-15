@@ -22,7 +22,7 @@ public class ChatServer extends JFrame {
     private Socket client_socket;
     private Vector UserVec = new Vector();
     private static final int BUF_LEN = 128;
-
+    private Vector RoomID = new Vector();
     public static void main(String[] args) {
         EventQueue.invokeLater(new Runnable() {
             public void run() {

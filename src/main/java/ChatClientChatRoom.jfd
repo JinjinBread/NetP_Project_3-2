@@ -10,18 +10,6 @@ new FormModel {
 				name: "panel1"
 				"background": new java.awt.Color( 186, 206, 224, 255 )
 				"border": sfield com.jformdesigner.model.FormObject NULL_VALUE
-				add( new FormComponent( "javax.swing.JButton" ) {
-					name: "listBtn"
-					"icon": new com.jformdesigner.model.SwingIcon( 0, "/list.png" )
-					"border": sfield com.jformdesigner.model.FormObject NULL_VALUE
-					addEvent( new FormEvent( "java.awt.event.MouseListener", "mouseEntered", "mouseEntered", true ) )
-					addEvent( new FormEvent( "java.awt.event.MouseListener", "mouseExited", "mouseExited", true ) )
-				}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
-					"x": 345
-					"y": 8
-					"width": 30
-					"height": 30
-				} )
 				add( new FormContainer( "javax.swing.JScrollPane", new FormLayoutManager( class javax.swing.JScrollPane ) ) {
 					name: "scrollPane1"
 					"border": sfield com.jformdesigner.model.FormObject NULL_VALUE
@@ -36,26 +24,57 @@ new FormModel {
 					"width": 383
 					"height": 385
 				} )
-				add( new FormComponent( "javax.swing.JTextField" ) {
-					name: "txtInput"
-					"background": new java.awt.Color( 255, 255, 255, 255 )
+				add( new FormContainer( "javax.swing.JMenuBar", new FormLayoutManager( class javax.swing.JMenuBar ) ) {
+					name: "menuBar"
+					"borderPainted": false
 					"border": sfield com.jformdesigner.model.FormObject NULL_VALUE
+					"background": new java.awt.Color( 186, 206, 224, 255 )
+					add( new FormContainer( "javax.swing.JMenu", new FormLayoutManager( class javax.swing.JMenu ) ) {
+						name: "menu"
+						"icon": new com.jformdesigner.model.SwingIcon( 0, "/list.png" )
+						"border": sfield com.jformdesigner.model.FormObject NULL_VALUE
+						addEvent( new FormEvent( "java.awt.event.MouseListener", "mouseEntered", "mouseEntered", true ) )
+						addEvent( new FormEvent( "java.awt.event.MouseListener", "mouseExited", "mouseExited", true ) )
+						add( new FormComponent( "javax.swing.JMenuItem" ) {
+							name: "participantsItem"
+							"text": "Participants"
+						} )
+						add( new FormComponent( "javax.swing.JMenuItem" ) {
+							name: "inviteItem"
+							"text": "Invite"
+						} )
+						add( new FormComponent( "javax.swing.JMenuItem" ) {
+							name: "exitItem"
+							"text": "Exit"
+						} )
+					} )
 				}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
-					"width": 383
-					"height": 100
-					"x": 0
-					"y": 435
+					"x": 341
+					"y": 7
 				} )
 			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
 				"x": 0
 				"y": 0
-				"height": 535
+				"height": 435
 				"width": 383
 			} )
 			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.jformdesigner.runtime.NullLayout ) ) {
 				name: "panel2"
 				"background": new java.awt.Color( 255, 255, 255, 255 )
 				"border": sfield com.jformdesigner.model.FormObject NULL_VALUE
+				add( new FormContainer( "javax.swing.JScrollPane", new FormLayoutManager( class javax.swing.JScrollPane ) ) {
+					name: "scrollPane2"
+					"border": sfield com.jformdesigner.model.FormObject NULL_VALUE
+					add( new FormComponent( "javax.swing.JTextArea" ) {
+						name: "txtInput"
+						"background": new java.awt.Color( 255, 255, 255, 255 )
+					} )
+				}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+					"y": 0
+					"width": 360
+					"height": 95
+					"x": 11
+				} )
 				add( new FormComponent( "javax.swing.JButton" ) {
 					name: "fileBtn"
 					"icon": new com.jformdesigner.model.SwingIcon( 0, "/file.png" )
@@ -66,7 +85,7 @@ new FormModel {
 					"width": 30
 					"height": 30
 					"x": 40
-					"y": 4
+					"y": 103
 				} )
 				add( new FormComponent( "javax.swing.JButton" ) {
 					name: "emoticonBtn"
@@ -77,8 +96,8 @@ new FormModel {
 				}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
 					"width": 30
 					"height": 30
-					"x": 4
-					"y": 4
+					"x": 5
+					"y": 103
 				} )
 				add( new FormComponent( "javax.swing.JButton" ) {
 					name: "sendBtn"
@@ -87,14 +106,14 @@ new FormModel {
 				}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
 					"width": 60
 					"x": 320
-					"y": 5
+					"y": 103
 					"height": 30
 				} )
 			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
 				"width": 383
-				"height": 38
+				"height": 138
 				"x": 0
-				"y": 535
+				"y": 435
 			} )
 		}, new FormLayoutConstraints( null ) {
 			"location": new java.awt.Point( 0, 15 )

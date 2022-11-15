@@ -1,8 +1,12 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.geom.Ellipse2D;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.Socket;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
@@ -26,17 +30,34 @@ public class ChatClientChatRoom extends JFrame {
     private ObjectInputStream ois;
     private ObjectOutputStream oos;
     private FileDialog fd;
+    private SimpleDateFormat dateFormat = new SimpleDateFormat(" aa kk:mm");
 
     public ChatClientChatRoom(String name, String ip, String port) {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
         initComponents();
 
-        listBtn.setContentAreaFilled(false); emoticonBtn.setContentAreaFilled(false); fileBtn.setContentAreaFilled(false);
-        listBtn.setFocusPainted(false); emoticonBtn.setFocusPainted(false); fileBtn.setFocusPainted(false);
-
-        AppendTextL("User " + name + " connecting " + ip + " " + port);
+        AppendTextC("User " + name + " connecting " + ip + " " + port);
         UserName = name;
+
+        menu.setContentAreaFilled(false); emoticonBtn.setContentAreaFilled(false); fileBtn.setContentAreaFilled(false);
+        menu.setFocusPainted(false); emoticonBtn.setFocusPainted(false); fileBtn.setFocusPainted(false);
+
+        menu.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+            }
+        });
+
+        exitItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ChatObject obcm = new ChatObject(UserName, "400", "Bye");
+                SendObject(obcm);
+                System.exit(0);
+            }
+        });
 
         try {
             socket = new Socket(ip, Integer.parseInt(port));
@@ -52,7 +73,15 @@ public class ChatClientChatRoom extends JFrame {
             net.start();
             TextSendAction action = new TextSendAction();
             sendBtn.addActionListener(action);
-            txtInput.addActionListener(action); // Enter로도 event 받기 위해
+            txtInput.addKeyListener(new KeyAdapter() {
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    if(e.getKeyCode() == KeyEvent.VK_ENTER) {
+                        e.consume();
+
+                    }
+                }
+            });
             txtInput.requestFocus();
             ImageSendAction action2 = new ImageSendAction();
             fileBtn.addActionListener(action2);
@@ -60,7 +89,7 @@ public class ChatClientChatRoom extends JFrame {
         } catch (NumberFormatException | IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-            AppendTextL("connect error");
+            AppendTextC("connect error");
         }
     }
     class ListenNetwork extends Thread {
@@ -82,19 +111,24 @@ public class ChatClientChatRoom extends JFrame {
                         break;
                     if (obcm instanceof ChatObject) {
                         cm = (ChatObject) obcm;
-                        msg = String.format("[%s]\n%s", cm.UserName, cm.data);
+                        // 출력 format
+                        msg = String.format(" [%s]\n%s", cm.UserName, cm.data);
                     } else
                         continue;
                     switch (cm.code) {
                         case "200": // chat message
                             if (cm.UserName.equals(UserName))
                                 AppendTextR(msg); // 내 메세지는 우측에
+                            else if (cm.UserName.equals("SERVER"))
+                                AppendTextC(msg);
                             else
                                 AppendTextL(msg);
                             break;
                         case "300": // Image 첨부
                             if (cm.UserName.equals(UserName))
                                 AppendTextR("[" + cm.UserName + "]");
+                            else if (cm.UserName.equals("SERVER"))
+                                AppendTextC(msg);
                             else
                                 AppendTextL("[" + cm.UserName + "]");
                             AppendImage(cm.img);
@@ -104,7 +138,7 @@ public class ChatClientChatRoom extends JFrame {
 //                            break;
                     }
                 } catch (IOException e) {
-                    AppendTextL("ois.readObject() error");
+                    AppendTextC("ois.readObject() error");
                     try {
                         ois.close();
                         oos.close();
@@ -251,19 +285,38 @@ public class ChatClientChatRoom extends JFrame {
     }
 
     // 프로필
-//    ImageIcon icon1 = new ImageIcon("src/icon1.jpg");
-//
-//    public void AppendIcon(ImageIcon icon) {
+    ImageIcon icon1 = new ImageIcon("src/main/resources/icon1.jpg");
+
+    public void AppendIcon(ImageIcon icon) {
 //        int len = textArea.getDocument().getLength();
 //        // 끝으로 이동
 //        textArea.setCaretPosition(len);
 //        textArea.insertIcon(icon);
-//    }
+
+//        int radius = 30;
+//        int margin = 5;
+//        BufferedImage mask = new BufferedImage(2 * radius + (2 * margin), 2 * radius + (2 * margin), BufferedImage.TYPE_INT_ARGB);
+//        Graphics2D g2d = mask.createGraphics();
+//        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON); // 안티알리어싱 사용
+//        //g2d.translate(mask.getWidth()/2, mask.getHeight()/2);
+//        g2d.fillOval(0, 0, diameter - 1, diameter - 1);
+//        g2d.dispose();
+        // 프로필을 원형으로 자르기
+        int width = 40;
+        BufferedImage circleBuffer = new BufferedImage(width, width, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = circleBuffer.createGraphics();
+        g2.setClip(new Ellipse2D.Float(0, 0, width, width));
+        g2.drawImage(icon.getImage(), 0, 0, width, width, null);
+
+        int len = textArea.getDocument().getLength();
+        textArea.setCaretPosition(len);
+        textArea.insertIcon(new ImageIcon(circleBuffer));
+    }
 
     // 화면에 출력
     public void AppendTextL(String msg) {
-        // textArea.append(msg + "\n");
-        // AppendIcon(icon1);
+        //textArea.append(msg + "\n");
+        AppendIcon(icon1);
         msg = msg.trim(); // 앞뒤 blank와 \n을 제거한다.
 
         StyledDocument doc = textArea.getStyledDocument();
@@ -271,14 +324,15 @@ public class ChatClientChatRoom extends JFrame {
         StyleConstants.setAlignment(left, StyleConstants.ALIGN_LEFT);
         StyleConstants.setForeground(left, Color.BLACK);
         doc.setParagraphAttributes(doc.getLength(), 1, left, false);
+        Date cur = new Date();
         try {
-            doc.insertString(doc.getLength(), msg+"\n", left );
+            doc.insertString(doc.getLength(),msg + dateFormat.format(cur) + "\n", left);
         } catch (BadLocationException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
         int len = textArea.getDocument().getLength();
-        textArea.setCaretPosition(len);
+        textArea.setCaretPosition(len); // 맨 아래로 스크롤함
         //textArea.replaceSelection("\n");
 
 
@@ -289,10 +343,30 @@ public class ChatClientChatRoom extends JFrame {
         StyledDocument doc = textArea.getStyledDocument();
         SimpleAttributeSet right = new SimpleAttributeSet();
         StyleConstants.setAlignment(right, StyleConstants.ALIGN_RIGHT);
-        StyleConstants.setForeground(right, Color.BLUE);
+        StyleConstants.setForeground(right, Color.BLACK);
         doc.setParagraphAttributes(doc.getLength(), 1, right, false);
+        Date cur = new Date();
         try {
-            doc.insertString(doc.getLength(),msg+"\n", right );
+            doc.insertString(doc.getLength(), dateFormat.format(cur) + msg+"\n", right );
+        } catch (BadLocationException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        int len = textArea.getDocument().getLength();
+        textArea.setCaretPosition(len);
+        //textArea.replaceSelection("\n");
+
+    }
+    // 화면 중앙에 출력
+    public void AppendTextC(String msg) {
+        msg = msg.trim(); // 앞뒤 blank와 \n을 제거한다.
+        StyledDocument doc = textArea.getStyledDocument();
+        SimpleAttributeSet center = new SimpleAttributeSet();
+        StyleConstants.setAlignment(center, StyleConstants.ALIGN_CENTER);
+        StyleConstants.setForeground(center, Color.BLUE);
+        doc.setParagraphAttributes(doc.getLength(), 1, center, false);
+        try {
+            doc.insertString(doc.getLength(),msg+"\n", center );
         } catch (BadLocationException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -371,7 +445,7 @@ public class ChatClientChatRoom extends JFrame {
             ChatObject obcm = new ChatObject(UserName, "200", msg);
             oos.writeObject(obcm);
         } catch (IOException e) {
-            AppendTextL("oos.writeObject() error");
+            AppendTextC("oos.writeObject() error");
             try {
                 ois.close();
                 oos.close();
@@ -389,7 +463,7 @@ public class ChatClientChatRoom extends JFrame {
             oos.writeObject(ob);
         } catch (IOException e) {
             // textArea.append("메세지 송신 에러!!\n");
-            AppendTextL("SendObject Error");
+            AppendTextC("SendObject Error");
         }
     }
 
@@ -406,11 +480,16 @@ public class ChatClientChatRoom extends JFrame {
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents  @formatter:off
         panel1 = new JPanel();
-        listBtn = new JButton();
         scrollPane1 = new JScrollPane();
         textArea = new JTextPane();
-        txtInput = new JTextField();
+        menuBar = new JMenuBar();
+        menu = new JMenu();
+        participantsItem = new JMenuItem();
+        inviteItem = new JMenuItem();
+        exitItem = new JMenuItem();
         panel2 = new JPanel();
+        scrollPane2 = new JScrollPane();
+        txtInput = new JTextArea();
         fileBtn = new JButton();
         emoticonBtn = new JButton();
         sendBtn = new JButton();
@@ -426,22 +505,6 @@ public class ChatClientChatRoom extends JFrame {
             panel1.setBorder(null);
             panel1.setLayout(null);
 
-            //---- listBtn ----
-            listBtn.setIcon(new ImageIcon(getClass().getResource("/list.png")));
-            listBtn.setBorder(null);
-            listBtn.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseEntered(MouseEvent e) {
-                    ChatClientChatRoom.this.mouseEntered(e);
-                }
-                @Override
-                public void mouseExited(MouseEvent e) {
-                    ChatClientChatRoom.this.mouseExited(e);
-                }
-            });
-            panel1.add(listBtn);
-            listBtn.setBounds(345, 8, 30, 30);
-
             //======== scrollPane1 ========
             {
                 scrollPane1.setBorder(null);
@@ -454,11 +517,43 @@ public class ChatClientChatRoom extends JFrame {
             panel1.add(scrollPane1);
             scrollPane1.setBounds(0, 50, 383, 385);
 
-            //---- txtInput ----
-            txtInput.setBackground(Color.white);
-            txtInput.setBorder(null);
-            panel1.add(txtInput);
-            txtInput.setBounds(0, 435, 383, 100);
+            //======== menuBar ========
+            {
+                menuBar.setBorderPainted(false);
+                menuBar.setBorder(null);
+                menuBar.setBackground(new Color(0xbacee0));
+
+                //======== menu ========
+                {
+                    menu.setIcon(new ImageIcon(getClass().getResource("/list.png")));
+                    menu.setBorder(null);
+                    menu.addMouseListener(new MouseAdapter() {
+                        @Override
+                        public void mouseEntered(MouseEvent e) {
+                            ChatClientChatRoom.this.mouseEntered(e);
+                        }
+                        @Override
+                        public void mouseExited(MouseEvent e) {
+                            ChatClientChatRoom.this.mouseExited(e);
+                        }
+                    });
+
+                    //---- participantsItem ----
+                    participantsItem.setText("Participants");
+                    menu.add(participantsItem);
+
+                    //---- inviteItem ----
+                    inviteItem.setText("Invite");
+                    menu.add(inviteItem);
+
+                    //---- exitItem ----
+                    exitItem.setText("Exit");
+                    menu.add(exitItem);
+                }
+                menuBar.add(menu);
+            }
+            panel1.add(menuBar);
+            menuBar.setBounds(new Rectangle(new Point(341, 7), menuBar.getPreferredSize()));
 
             {
                 // compute preferred size
@@ -476,13 +571,24 @@ public class ChatClientChatRoom extends JFrame {
             }
         }
         contentPane.add(panel1);
-        panel1.setBounds(0, 0, 383, 535);
+        panel1.setBounds(0, 0, 383, 435);
 
         //======== panel2 ========
         {
             panel2.setBackground(Color.white);
             panel2.setBorder(null);
             panel2.setLayout(null);
+
+            //======== scrollPane2 ========
+            {
+                scrollPane2.setBorder(null);
+
+                //---- txtInput ----
+                txtInput.setBackground(Color.white);
+                scrollPane2.setViewportView(txtInput);
+            }
+            panel2.add(scrollPane2);
+            scrollPane2.setBounds(11, 0, 360, 95);
 
             //---- fileBtn ----
             fileBtn.setIcon(new ImageIcon(getClass().getResource("/file.png")));
@@ -498,7 +604,7 @@ public class ChatClientChatRoom extends JFrame {
                 }
             });
             panel2.add(fileBtn);
-            fileBtn.setBounds(40, 4, 30, 30);
+            fileBtn.setBounds(40, 103, 30, 30);
 
             //---- emoticonBtn ----
             emoticonBtn.setIcon(new ImageIcon(getClass().getResource("/emoticon.png")));
@@ -514,13 +620,13 @@ public class ChatClientChatRoom extends JFrame {
                 }
             });
             panel2.add(emoticonBtn);
-            emoticonBtn.setBounds(4, 4, 30, 30);
+            emoticonBtn.setBounds(5, 103, 30, 30);
 
             //---- sendBtn ----
             sendBtn.setText("\uc804\uc1a1");
             sendBtn.setBackground(new Color(0xf2f2f2));
             panel2.add(sendBtn);
-            sendBtn.setBounds(320, 5, 60, 30);
+            sendBtn.setBounds(320, 103, 60, 30);
 
             {
                 // compute preferred size
@@ -538,7 +644,7 @@ public class ChatClientChatRoom extends JFrame {
             }
         }
         contentPane.add(panel2);
-        panel2.setBounds(0, 535, 383, 38);
+        panel2.setBounds(0, 435, 383, 138);
 
         {
             // compute preferred size
@@ -561,11 +667,16 @@ public class ChatClientChatRoom extends JFrame {
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables  @formatter:off
     private JPanel panel1;
-    private JButton listBtn;
     private JScrollPane scrollPane1;
     private JTextPane textArea;
-    private JTextField txtInput;
+    private JMenuBar menuBar;
+    private JMenu menu;
+    private JMenuItem participantsItem;
+    private JMenuItem inviteItem;
+    private JMenuItem exitItem;
     private JPanel panel2;
+    private JScrollPane scrollPane2;
+    private JTextArea txtInput;
     private JButton fileBtn;
     private JButton emoticonBtn;
     private JButton sendBtn;
