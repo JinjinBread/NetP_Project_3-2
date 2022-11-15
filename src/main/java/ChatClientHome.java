@@ -1,5 +1,12 @@
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serial;
+import java.net.Socket;
+import java.text.SimpleDateFormat;
+import java.util.Vector;
 import javax.swing.*;
 /*
  * Created by JFormDesigner on Sat Nov 12 00:56:04 KST 2022
@@ -11,23 +18,164 @@ import javax.swing.*;
  * @author unknown
  */
 public class ChatClientHome extends JFrame {
-    public ChatClientHome() {
+    @Serial
+    private static final long serialVersionUID = 1L;
+    private static final int BUF_LEN = 128;
+    //private ChatClientChatRoom chatRoom = ChatClientChatRoom();
+    private String UserName;
+    private Socket socket;
+    private ObjectInputStream ois;
+    private ObjectOutputStream oos;
+    private SimpleDateFormat dateFormat = new SimpleDateFormat(" aa kk:mm");
+
+    private List RoomID = new List(); // ChatRoomID를 저장하는 자료구조
+    private String name;
+    private String ip;
+    private String port;
+    public ChatClientHome(String name, String ip, String port) {
+        this.name = name; this.ip = ip; this.port = port;
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         initComponents();
+        setVisible(true);
+        homeBtn.setContentAreaFilled(false); homeBtn.setFocusPainted(false);
+        chatListBtn.setContentAreaFilled(false); chatListBtn.setFocusPainted(false);
+
+        UserName = name;
+
+        try {
+            socket = new Socket(ip, Integer.parseInt(port));
+
+            oos = new ObjectOutputStream(socket.getOutputStream());
+            oos.flush();
+            ois = new ObjectInputStream(socket.getInputStream());
+
+            ChatObject obcm = new ChatObject(UserName, "100", "Hello");
+            SendObject(obcm);
+
+        } catch (NumberFormatException | IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "connect error", "ERROR MESSAGE", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    class ListenNetwork extends Thread {
+        public void run() {
+            while (true) {
+                try {
+
+                    Object obcm = null;
+                    String msg = null;
+                    ChatObject cm;
+                    try {
+                        obcm = ois.readObject();
+                    } catch (ClassNotFoundException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                        break;
+                    }
+                    if (obcm == null)
+                        break;
+                    if (obcm instanceof ChatObject) {
+                        cm = (ChatObject) obcm;
+                        scrollPane1.add(new friendPanel(cm));
+                        validate();
+                        // 출력 format
+                        //msg = String.format(" [%s]\n%s", cm.UserName, cm.data);
+                    } // else
+                        continue;
+//                    switch (cm.code) {
+//                        case "200": // chat message
+//                            if (cm.UserName.equals(UserName))
+//                                AppendTextR(msg); // 내 메세지는 우측에
+//                            else if (cm.UserName.equals("SERVER"))
+//                                AppendTextC(msg);
+//                            else
+//                                AppendTextL(msg);
+//                            break;
+//                        case "300": // Image 첨부
+//                            if (cm.UserName.equals(UserName))
+//                                AppendTextR("[" + cm.UserName + "]");
+//                            else if (cm.UserName.equals("SERVER"))
+//                                AppendTextC(msg);
+//                            else
+//                                AppendTextL("[" + cm.UserName + "]");
+//                            AppendImage(cm.img);
+//                            break;
+//                        case "500": // Mouse Event 수신
+//                            DoMouseEvent(cm);
+//                            break;
+//                    }
+                } catch (IOException e) {
+                    JOptionPane.showMessageDialog(null, "ois.readObject() error", "ERROR MESSAGE", JOptionPane.ERROR_MESSAGE);
+                    try {
+                        ois.close();
+                        oos.close();
+                        socket.close();
+
+                        break;
+                    } catch (Exception ee) {
+                        break;
+                    } // catch문 끝
+                } // 바깥 catch문끝
+
+            }
+        }
+    }
+
+    // Server에게 network으로 전송
+    public void SendMessage(String msg) {
+        try {
+            // dos.writeUTF(msg);
+//			byte[] bb;
+//			bb = MakePacket(msg);
+//			dos.write(bb, 0, bb.length);
+            ChatObject obcm = new ChatObject(UserName, "200", msg);
+            oos.writeObject(obcm);
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(null, "oos.writeObject() error", "ERROR MESSAGE", JOptionPane.ERROR_MESSAGE);
+            try {
+                ois.close();
+                oos.close();
+                socket.close();
+            } catch (IOException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+                System.exit(0);
+            }
+        }
+    }
+
+    public void SendObject(Object ob) { // 서버로 메세지를 보내는 메소드
+        try {
+            oos.writeObject(ob);
+        } catch (IOException e) {
+            // textArea.append("메세지 송신 에러!!\n");
+            JOptionPane.showMessageDialog(null, "SendObject Error", "ERROR MESSAGE", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void mouseEntered(MouseEvent e) {
         // TODO add your code here
+        this.setCursor(new Cursor(Cursor.HAND_CURSOR));
     }
 
     private void mouseExited(MouseEvent e) {
         // TODO add your code here
+        this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+    }
+
+    private void chatListBtnMouseClicked(MouseEvent e) {
+        // TODO add your code here
+        new ChatClientChatList(name, ip, port);
+        setVisible(false);
     }
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents  @formatter:off
         panel1 = new JPanel();
-        label1 = new JLabel();
-        label2 = new JLabel();
+        homeBtn = new JButton();
+        chatListBtn = new JButton();
         panel3 = new JPanel();
         label3 = new JLabel();
         panel2 = new JPanel();
@@ -43,15 +191,41 @@ public class ChatClientHome extends JFrame {
             panel1.setBackground(new Color(0xececed));
             panel1.setLayout(null);
 
-            //---- label1 ----
-            label1.setIcon(new ImageIcon(getClass().getResource("/clicked_home.png")));
-            panel1.add(label1);
-            label1.setBounds(26, 38, 28, 28);
+            //---- homeBtn ----
+            homeBtn.setIcon(new ImageIcon(getClass().getResource("/clicked_home.png")));
+            homeBtn.setBorder(null);
+            homeBtn.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    ChatClientHome.this.mouseEntered(e);
+                }
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    ChatClientHome.this.mouseExited(e);
+                }
+            });
+            panel1.add(homeBtn);
+            homeBtn.setBounds(18, 40, 40, 40);
 
-            //---- label2 ----
-            label2.setIcon(new ImageIcon(getClass().getResource("/clicked_chatList.png")));
-            panel1.add(label2);
-            label2.setBounds(26, 95, 24, 24);
+            //---- chatListBtn ----
+            chatListBtn.setBorder(null);
+            chatListBtn.setIcon(new ImageIcon(getClass().getResource("/clicked_chatList.png")));
+            chatListBtn.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    chatListBtnMouseClicked(e);
+                }
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    ChatClientHome.this.mouseEntered(e);
+                }
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    ChatClientHome.this.mouseExited(e);
+                }
+            });
+            panel1.add(chatListBtn);
+            chatListBtn.setBounds(18, 125, 40, 40);
 
             {
                 // compute preferred size
@@ -104,7 +278,15 @@ public class ChatClientHome extends JFrame {
         //======== panel2 ========
         {
             panel2.setBackground(Color.white);
+            panel2.setForeground(Color.white);
             panel2.setLayout(null);
+
+            //======== scrollPane1 ========
+            {
+                scrollPane1.setBorder(null);
+                scrollPane1.setBackground(Color.white);
+                scrollPane1.setForeground(Color.white);
+            }
             panel2.add(scrollPane1);
             scrollPane1.setBounds(0, 0, 309, 493);
 
@@ -147,8 +329,8 @@ public class ChatClientHome extends JFrame {
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables  @formatter:off
     private JPanel panel1;
-    private JLabel label1;
-    private JLabel label2;
+    private JButton homeBtn;
+    private JButton chatListBtn;
     private JPanel panel3;
     private JLabel label3;
     private JPanel panel2;

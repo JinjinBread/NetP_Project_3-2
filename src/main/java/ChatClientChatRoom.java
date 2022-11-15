@@ -23,6 +23,7 @@ import javax.swing.text.StyledDocument;
 public class ChatClientChatRoom extends JFrame {
     @Serial
     private static final long serialVersionUID = 1L;
+    //private ChatClientHome clientView = new ChatClientHome();
 
     private static final int BUF_LEN = 128;
     private String UserName;
@@ -32,13 +33,13 @@ public class ChatClientChatRoom extends JFrame {
     private FileDialog fd;
     private SimpleDateFormat dateFormat = new SimpleDateFormat(" aa kk:mm");
 
-    public ChatClientChatRoom(String name, String ip, String port) {
+    public ChatClientChatRoom() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
         initComponents();
 
-        AppendTextC("User " + name + " connecting " + ip + " " + port);
-        UserName = name;
+//        AppendTextC("User " + name + " connecting " + ip + " " + port);
+//        UserName = name;
 
         menu.setContentAreaFilled(false); emoticonBtn.setContentAreaFilled(false); fileBtn.setContentAreaFilled(false);
         menu.setFocusPainted(false); emoticonBtn.setFocusPainted(false); fileBtn.setFocusPainted(false);
@@ -60,7 +61,7 @@ public class ChatClientChatRoom extends JFrame {
         });
 
         try {
-            socket = new Socket(ip, Integer.parseInt(port));
+//            socket = new Socket(ip, Integer.parseInt(port));
 
             oos = new ObjectOutputStream(socket.getOutputStream());
             oos.flush();
@@ -72,16 +73,9 @@ public class ChatClientChatRoom extends JFrame {
             ListenNetwork net = new ListenNetwork();
             net.start();
             TextSendAction action = new TextSendAction();
+            TextSendKeyAction keyAction = new TextSendKeyAction();
             sendBtn.addActionListener(action);
-            txtInput.addKeyListener(new KeyAdapter() {
-                @Override
-                public void keyPressed(KeyEvent e) {
-                    if(e.getKeyCode() == KeyEvent.VK_ENTER) {
-                        e.consume();
-
-                    }
-                }
-            });
+            txtInput.addKeyListener(keyAction);
             txtInput.requestFocus();
             ImageSendAction action2 = new ImageSendAction();
             fileBtn.addActionListener(action2);
@@ -249,16 +243,30 @@ public class ChatClientChatRoom extends JFrame {
     class TextSendAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            // Send button을 누르거나 메시지 입력하고 Enter key 치면
-            if (e.getSource() == sendBtn || e.getSource() == txtInput) {
+            // Send button을 누르면
+            if (e.getSource() == sendBtn) {
                 String msg = null;
                 // msg = String.format("[%s] %s\n", UserName, txtInput.getText());
                 msg = txtInput.getText();
                 SendMessage(msg);
                 txtInput.setText(""); // 메세지를 보내고 나면 메세지 쓰는창을 비운다.
                 txtInput.requestFocus(); // 메세지를 보내고 커서를 다시 텍스트 필드로 위치시킨다
-                if (msg.contains("/exit")) // 종료 처리
-                    System.exit(0);
+            }
+        }
+    }
+
+    class TextSendKeyAction extends KeyAdapter {
+        @Override
+        public void keyPressed(KeyEvent e) {
+            // Enter 키를 누르면
+            if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                e.consume();
+                String msg = null;
+                // msg = String.format("[%s] %s\n", UserName, txtInput.getText());
+                msg = txtInput.getText();
+                SendMessage(msg);
+                txtInput.setText(""); // 메세지를 보내고 나면 메세지 쓰는창을 비운다.
+                txtInput.requestFocus(); // 메세지를 보내고 커서를 다시 텍스트 필드로 위치시킨다
             }
         }
     }
@@ -416,25 +424,6 @@ public class ChatClientChatRoom extends JFrame {
 //        gc.drawImage(panelImage, 0, 0, panel.getWidth(), panel.getHeight(), panel);
     }
 
-    // Windows 처럼 message 제외한 나머지 부분은 NULL 로 만들기 위한 함수
-    public byte[] MakePacket(String msg) {
-        byte[] packet = new byte[BUF_LEN];
-        byte[] bb = null;
-        int i;
-        for (i = 0; i < BUF_LEN; i++)
-            packet[i] = 0;
-        try {
-            bb = msg.getBytes("euc-kr");
-        } catch (UnsupportedEncodingException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            System.exit(0);
-        }
-        for (i = 0; i < bb.length; i++)
-            packet[i] = bb[i];
-        return packet;
-    }
-
     // Server에게 network으로 전송
     public void SendMessage(String msg) {
         try {
@@ -515,7 +504,7 @@ public class ChatClientChatRoom extends JFrame {
                 scrollPane1.setViewportView(textArea);
             }
             panel1.add(scrollPane1);
-            scrollPane1.setBounds(0, 50, 383, 385);
+            scrollPane1.setBounds(9, 50, 365, 385);
 
             //======== menuBar ========
             {
@@ -585,10 +574,11 @@ public class ChatClientChatRoom extends JFrame {
 
                 //---- txtInput ----
                 txtInput.setBackground(Color.white);
+                txtInput.setLineWrap(true);
                 scrollPane2.setViewportView(txtInput);
             }
             panel2.add(scrollPane2);
-            scrollPane2.setBounds(11, 0, 360, 95);
+            scrollPane2.setBounds(11, 5, 360, 90);
 
             //---- fileBtn ----
             fileBtn.setIcon(new ImageIcon(getClass().getResource("/file.png")));

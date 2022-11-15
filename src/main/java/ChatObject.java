@@ -8,10 +8,15 @@ public class ChatObject implements Serializable {
     public String UserName;
     public String data;
     public ImageIcon img;
+    public String status = null;
+    public boolean isOnline;
+
 
     public ChatObject(String UserName, String code, String msg) {
         this.code = code;
         this.UserName = UserName;
         this.data = msg;
     }
+
+
 }

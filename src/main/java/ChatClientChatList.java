@@ -11,28 +11,45 @@ import javax.swing.*;
  * @author unknown
  */
 public class ChatClientChatList extends JFrame {
-    public ChatClientChatList() {
+    private String name;
+    private String ip;
+    private String port;
+
+    public ChatClientChatList(String name, String ip, String port) {
+        this.name = name; this.ip = ip; this.port = port;
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         initComponents();
+        setVisible(true);
+        homeBtn.setContentAreaFilled(false); homeBtn.setFocusPainted(false);
+        chatListBtn.setContentAreaFilled(false); chatListBtn.setFocusPainted(false);
+        createRoomBtn.setContentAreaFilled(false); createRoomBtn.setFocusPainted(false);
     }
 
     private void mouseEntered(MouseEvent e) {
         // TODO add your code here
+        this.setCursor(new Cursor(Cursor.HAND_CURSOR));
     }
 
     private void mouseExited(MouseEvent e) {
         // TODO add your code here
+        this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+    }
+
+    private void homeBtnMouseClicked(MouseEvent e) {
+        new ChatClientHome(name, ip, port);
+        setVisible(false);
     }
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents  @formatter:off
         panel1 = new JPanel();
-        label1 = new JLabel();
-        label2 = new JLabel();
+        homeBtn = new JButton();
+        chatListBtn = new JButton();
         panel3 = new JPanel();
         label3 = new JLabel();
-        label4 = new JLabel();
-        panel2 = new JPanel();
+        createRoomBtn = new JButton();
         scrollPane1 = new JScrollPane();
+        ListFrame = new JPanel();
 
         //======== this ========
         setResizable(false);
@@ -44,15 +61,41 @@ public class ChatClientChatList extends JFrame {
             panel1.setBackground(new Color(0xececed));
             panel1.setLayout(null);
 
-            //---- label1 ----
-            label1.setIcon(new ImageIcon(getClass().getResource("/clicked_home.png")));
-            panel1.add(label1);
-            label1.setBounds(26, 38, 28, 28);
+            //---- homeBtn ----
+            homeBtn.setIcon(new ImageIcon(getClass().getResource("/clicked_home.png")));
+            homeBtn.setBorder(null);
+            homeBtn.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    homeBtnMouseClicked(e);
+                }
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    ChatClientChatList.this.mouseEntered(e);
+                }
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    ChatClientChatList.this.mouseExited(e);
+                }
+            });
+            panel1.add(homeBtn);
+            homeBtn.setBounds(18, 40, 40, 40);
 
-            //---- label2 ----
-            label2.setIcon(new ImageIcon(getClass().getResource("/clicked_chatList.png")));
-            panel1.add(label2);
-            label2.setBounds(26, 95, 24, 24);
+            //---- chatListBtn ----
+            chatListBtn.setBorder(null);
+            chatListBtn.setIcon(new ImageIcon(getClass().getResource("/clicked_chatList.png")));
+            chatListBtn.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    ChatClientChatList.this.mouseEntered(e);
+                }
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    ChatClientChatList.this.mouseExited(e);
+                }
+            });
+            panel1.add(chatListBtn);
+            chatListBtn.setBounds(18, 125, 40, 40);
 
             {
                 // compute preferred size
@@ -84,10 +127,22 @@ public class ChatClientChatList extends JFrame {
             panel3.add(label3);
             label3.setBounds(15, 38, 30, 30);
 
-            //---- label4 ----
-            label4.setIcon(new ImageIcon(getClass().getResource("/create_chatRoom.png")));
-            panel3.add(label4);
-            label4.setBounds(new Rectangle(new Point(275, 41), label4.getPreferredSize()));
+            //---- createRoomBtn ----
+            createRoomBtn.setIcon(new ImageIcon(getClass().getResource("/create_chatRoom.png")));
+            createRoomBtn.setBackground(Color.white);
+            createRoomBtn.setBorder(null);
+            createRoomBtn.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    ChatClientChatList.this.mouseEntered(e);
+                }
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    ChatClientChatList.this.mouseExited(e);
+                }
+            });
+            panel3.add(createRoomBtn);
+            createRoomBtn.setBounds(250, 20, 50, 50);
 
             {
                 // compute preferred size
@@ -107,30 +162,20 @@ public class ChatClientChatList extends JFrame {
         contentPane.add(panel3);
         panel3.setBounds(75, 0, 309, 80);
 
-        //======== panel2 ========
+        //======== scrollPane1 ========
         {
-            panel2.setBackground(Color.white);
-            panel2.setLayout(null);
-            panel2.add(scrollPane1);
-            scrollPane1.setBounds(0, 0, 309, 493);
+            scrollPane1.setBackground(Color.white);
+            scrollPane1.setBorder(null);
 
+            //======== ListFrame ========
             {
-                // compute preferred size
-                Dimension preferredSize = new Dimension();
-                for(int i = 0; i < panel2.getComponentCount(); i++) {
-                    Rectangle bounds = panel2.getComponent(i).getBounds();
-                    preferredSize.width = Math.max(bounds.x + bounds.width, preferredSize.width);
-                    preferredSize.height = Math.max(bounds.y + bounds.height, preferredSize.height);
-                }
-                Insets insets = panel2.getInsets();
-                preferredSize.width += insets.right;
-                preferredSize.height += insets.bottom;
-                panel2.setMinimumSize(preferredSize);
-                panel2.setPreferredSize(preferredSize);
+                ListFrame.setBackground(Color.white);
+                ListFrame.setLayout(new GridLayout());
             }
+            scrollPane1.setViewportView(ListFrame);
         }
-        contentPane.add(panel2);
-        panel2.setBounds(75, 80, 309, 493);
+        contentPane.add(scrollPane1);
+        scrollPane1.setBounds(75, 80, 308, 492);
 
         {
             // compute preferred size
@@ -153,12 +198,12 @@ public class ChatClientChatList extends JFrame {
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables  @formatter:off
     private JPanel panel1;
-    private JLabel label1;
-    private JLabel label2;
+    private JButton homeBtn;
+    private JButton chatListBtn;
     private JPanel panel3;
     private JLabel label3;
-    private JLabel label4;
-    private JPanel panel2;
+    private JButton createRoomBtn;
     private JScrollPane scrollPane1;
+    private JPanel ListFrame;
     // JFormDesigner - End of variables declaration  //GEN-END:variables  @formatter:on
 }
