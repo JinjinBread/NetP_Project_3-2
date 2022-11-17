@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.io.Serializable;
+import java.util.Vector;
 
 // ChatObject.java 채팅 메시지 ObjectStream 용.
 public class ChatObject implements Serializable {
@@ -9,8 +10,9 @@ public class ChatObject implements Serializable {
     public String data;
     public ImageIcon img;
     public String status = null;
+    public int room_id;
     public boolean isOnline;
-
+    public Vector<ChatClientHome> userlist;
 
     public ChatObject(String UserName, String code, String msg) {
         this.code = code;
@@ -18,5 +20,10 @@ public class ChatObject implements Serializable {
         this.data = msg;
     }
 
+    public ChatObject(String code, int room_id, Vector<ChatClientHome> userlist) {
+        this.code = code;
+        this.room_id = room_id;
+        this.userlist = userlist;
+    }
 
 }

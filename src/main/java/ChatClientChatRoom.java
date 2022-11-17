@@ -33,13 +33,13 @@ public class ChatClientChatRoom extends JFrame {
     private FileDialog fd;
     private SimpleDateFormat dateFormat = new SimpleDateFormat(" aa kk:mm");
 
-    public ChatClientChatRoom() {
+    public ChatClientChatRoom(ChatClientHome mainview, String name, String ip, String port) {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
         initComponents();
 
-//        AppendTextC("User " + name + " connecting " + ip + " " + port);
-//        UserName = name;
+        AppendTextC("User " + name + " connecting " + ip + " " + port);
+        UserName = name;
 
         menu.setContentAreaFilled(false); emoticonBtn.setContentAreaFilled(false); fileBtn.setContentAreaFilled(false);
         menu.setFocusPainted(false); emoticonBtn.setFocusPainted(false); fileBtn.setFocusPainted(false);
@@ -61,7 +61,7 @@ public class ChatClientChatRoom extends JFrame {
         });
 
         try {
-//            socket = new Socket(ip, Integer.parseInt(port));
+            socket = new Socket(ip, Integer.parseInt(port));
 
             oos = new ObjectOutputStream(socket.getOutputStream());
             oos.flush();
@@ -334,7 +334,10 @@ public class ChatClientChatRoom extends JFrame {
         doc.setParagraphAttributes(doc.getLength(), 1, left, false);
         Date cur = new Date();
         try {
+            // JLabel ~ = new JLable;
             doc.insertString(doc.getLength(),msg + dateFormat.format(cur) + "\n", left);
+            // string format이 힘드므로 채팅메시지를 받아다가 label로 만들어서 집어 넣는다.
+            // insertComponent(JLabel);
         } catch (BadLocationException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

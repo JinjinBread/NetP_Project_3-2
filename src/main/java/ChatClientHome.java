@@ -6,7 +6,6 @@ import java.io.ObjectOutputStream;
 import java.io.Serial;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
-import java.util.Vector;
 import javax.swing.*;
 /*
  * Created by JFormDesigner on Sat Nov 12 00:56:04 KST 2022
@@ -22,6 +21,7 @@ public class ChatClientHome extends JFrame {
     private static final long serialVersionUID = 1L;
     private static final int BUF_LEN = 128;
     //private ChatClientChatRoom chatRoom = ChatClientChatRoom();
+    private final ChatClientHome mainview = this;
     private String UserName;
     private Socket socket;
     private ObjectInputStream ois;
@@ -36,6 +36,8 @@ public class ChatClientHome extends JFrame {
         this.name = name; this.ip = ip; this.port = port;
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         initComponents();
+        chatListHeader.setVisible(false);
+        chatList.setVisible(false);
         setVisible(true);
         homeBtn.setContentAreaFilled(false); homeBtn.setFocusPainted(false);
         chatListBtn.setContentAreaFilled(false); chatListBtn.setFocusPainted(false);
@@ -52,6 +54,8 @@ public class ChatClientHome extends JFrame {
             ChatObject obcm = new ChatObject(UserName, "100", "Hello");
             SendObject(obcm);
 
+            ChatClientHome.ListenNetwork net = new ChatClientHome.ListenNetwork();
+            net.start();
         } catch (NumberFormatException | IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -78,7 +82,7 @@ public class ChatClientHome extends JFrame {
                         break;
                     if (obcm instanceof ChatObject) {
                         cm = (ChatObject) obcm;
-                        scrollPane1.add(new friendPanel(cm));
+                        chatRoom.setViewportView(new FriendPanel(cm));
                         validate();
                         // 출력 format
                         //msg = String.format(" [%s]\n%s", cm.UserName, cm.data);
@@ -167,34 +171,60 @@ public class ChatClientHome extends JFrame {
 
     private void chatListBtnMouseClicked(MouseEvent e) {
         // TODO add your code here
-        new ChatClientChatList(name, ip, port);
-        setVisible(false);
+        //chatListBtn.setEnabled(false);
+        friendList.setVisible(false);
+        chatList.setVisible(true);
+        friendHeader.setVisible(false);
+        chatListHeader.setVisible(true);
+    }
+
+    private void createRoom(MouseEvent e) {
+        // TODO add your code here
+    }
+
+    private void homeBtnMouseClicked(MouseEvent e) { // 홈화면( == 친구 목록 화면)으로 이동
+        // TODO add your code here
+        friendList.setVisible(true);
+        chatList.setVisible(false);
+        friendHeader.setVisible(true);
+        chatListHeader.setVisible(false);
     }
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents  @formatter:off
-        panel1 = new JPanel();
+        list = new JPanel();
         homeBtn = new JButton();
         chatListBtn = new JButton();
-        panel3 = new JPanel();
+        friendHeader = new JPanel();
         label3 = new JLabel();
-        panel2 = new JPanel();
-        scrollPane1 = new JScrollPane();
+        chatListHeader = new JPanel();
+        label4 = new JLabel();
+        createRoomBtn = new JButton();
+        friendList = new JPanel();
+        friend = new JScrollPane();
+        textPane1 = new JTextPane();
+        chatList = new JPanel();
+        chatRoom = new JScrollPane();
+        textPane2 = new JTextPane();
 
         //======== this ========
         setResizable(false);
         var contentPane = getContentPane();
         contentPane.setLayout(null);
 
-        //======== panel1 ========
+        //======== list ========
         {
-            panel1.setBackground(new Color(0xececed));
-            panel1.setLayout(null);
+            list.setBackground(new Color(0xececed));
+            list.setLayout(null);
 
             //---- homeBtn ----
             homeBtn.setIcon(new ImageIcon(getClass().getResource("/clicked_home.png")));
             homeBtn.setBorder(null);
             homeBtn.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    homeBtnMouseClicked(e);
+                }
                 @Override
                 public void mouseEntered(MouseEvent e) {
                     ChatClientHome.this.mouseEntered(e);
@@ -204,7 +234,7 @@ public class ChatClientHome extends JFrame {
                     ChatClientHome.this.mouseExited(e);
                 }
             });
-            panel1.add(homeBtn);
+            list.add(homeBtn);
             homeBtn.setBounds(18, 40, 40, 40);
 
             //---- chatListBtn ----
@@ -224,89 +254,177 @@ public class ChatClientHome extends JFrame {
                     ChatClientHome.this.mouseExited(e);
                 }
             });
-            panel1.add(chatListBtn);
+            list.add(chatListBtn);
             chatListBtn.setBounds(18, 125, 40, 40);
 
             {
                 // compute preferred size
                 Dimension preferredSize = new Dimension();
-                for(int i = 0; i < panel1.getComponentCount(); i++) {
-                    Rectangle bounds = panel1.getComponent(i).getBounds();
+                for(int i = 0; i < list.getComponentCount(); i++) {
+                    Rectangle bounds = list.getComponent(i).getBounds();
                     preferredSize.width = Math.max(bounds.x + bounds.width, preferredSize.width);
                     preferredSize.height = Math.max(bounds.y + bounds.height, preferredSize.height);
                 }
-                Insets insets = panel1.getInsets();
+                Insets insets = list.getInsets();
                 preferredSize.width += insets.right;
                 preferredSize.height += insets.bottom;
-                panel1.setMinimumSize(preferredSize);
-                panel1.setPreferredSize(preferredSize);
+                list.setMinimumSize(preferredSize);
+                list.setPreferredSize(preferredSize);
             }
         }
-        contentPane.add(panel1);
-        panel1.setBounds(-1, 0, 76, 573);
+        contentPane.add(list);
+        list.setBounds(-1, 0, 76, 573);
 
-        //======== panel3 ========
+        //======== friendHeader ========
         {
-            panel3.setBackground(Color.white);
-            panel3.setLayout(null);
+            friendHeader.setBackground(Color.white);
+            friendHeader.setLayout(null);
 
             //---- label3 ----
             label3.setText("\uce5c\uad6c");
             label3.setForeground(Color.black);
             label3.setFont(label3.getFont().deriveFont(Font.BOLD, 14f));
-            panel3.add(label3);
+            friendHeader.add(label3);
             label3.setBounds(15, 38, 30, 30);
 
             {
                 // compute preferred size
                 Dimension preferredSize = new Dimension();
-                for(int i = 0; i < panel3.getComponentCount(); i++) {
-                    Rectangle bounds = panel3.getComponent(i).getBounds();
+                for(int i = 0; i < friendHeader.getComponentCount(); i++) {
+                    Rectangle bounds = friendHeader.getComponent(i).getBounds();
                     preferredSize.width = Math.max(bounds.x + bounds.width, preferredSize.width);
                     preferredSize.height = Math.max(bounds.y + bounds.height, preferredSize.height);
                 }
-                Insets insets = panel3.getInsets();
+                Insets insets = friendHeader.getInsets();
                 preferredSize.width += insets.right;
                 preferredSize.height += insets.bottom;
-                panel3.setMinimumSize(preferredSize);
-                panel3.setPreferredSize(preferredSize);
+                friendHeader.setMinimumSize(preferredSize);
+                friendHeader.setPreferredSize(preferredSize);
             }
         }
-        contentPane.add(panel3);
-        panel3.setBounds(75, 0, 309, 80);
+        contentPane.add(friendHeader);
+        friendHeader.setBounds(75, 0, 309, 80);
 
-        //======== panel2 ========
+        //======== chatListHeader ========
         {
-            panel2.setBackground(Color.white);
-            panel2.setForeground(Color.white);
-            panel2.setLayout(null);
+            chatListHeader.setBackground(Color.white);
+            chatListHeader.setLayout(null);
 
-            //======== scrollPane1 ========
-            {
-                scrollPane1.setBorder(null);
-                scrollPane1.setBackground(Color.white);
-                scrollPane1.setForeground(Color.white);
-            }
-            panel2.add(scrollPane1);
-            scrollPane1.setBounds(0, 0, 309, 493);
+            //---- label4 ----
+            label4.setText("\ucc44\ud305");
+            label4.setForeground(Color.black);
+            label4.setFont(label4.getFont().deriveFont(Font.BOLD, 14f));
+            chatListHeader.add(label4);
+            label4.setBounds(15, 38, 30, 30);
+
+            //---- createRoomBtn ----
+            createRoomBtn.setIcon(new ImageIcon(getClass().getResource("/create_chatRoom.png")));
+            createRoomBtn.setBackground(Color.white);
+            createRoomBtn.setBorder(null);
+            createRoomBtn.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    createRoom(e);
+                }
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    ChatClientHome.this.mouseEntered(e);
+                }
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    ChatClientHome.this.mouseExited(e);
+                }
+            });
+            chatListHeader.add(createRoomBtn);
+            createRoomBtn.setBounds(250, 20, 50, 50);
 
             {
                 // compute preferred size
                 Dimension preferredSize = new Dimension();
-                for(int i = 0; i < panel2.getComponentCount(); i++) {
-                    Rectangle bounds = panel2.getComponent(i).getBounds();
+                for(int i = 0; i < chatListHeader.getComponentCount(); i++) {
+                    Rectangle bounds = chatListHeader.getComponent(i).getBounds();
                     preferredSize.width = Math.max(bounds.x + bounds.width, preferredSize.width);
                     preferredSize.height = Math.max(bounds.y + bounds.height, preferredSize.height);
                 }
-                Insets insets = panel2.getInsets();
+                Insets insets = chatListHeader.getInsets();
                 preferredSize.width += insets.right;
                 preferredSize.height += insets.bottom;
-                panel2.setMinimumSize(preferredSize);
-                panel2.setPreferredSize(preferredSize);
+                chatListHeader.setMinimumSize(preferredSize);
+                chatListHeader.setPreferredSize(preferredSize);
             }
         }
-        contentPane.add(panel2);
-        panel2.setBounds(75, 80, 309, 493);
+        contentPane.add(chatListHeader);
+        chatListHeader.setBounds(75, 0, 309, 80);
+
+        //======== friendList ========
+        {
+            friendList.setBackground(Color.white);
+            friendList.setForeground(Color.white);
+            friendList.setLayout(null);
+
+            //======== friend ========
+            {
+                friend.setBorder(null);
+
+                //---- textPane1 ----
+                textPane1.setEnabled(false);
+                friend.setViewportView(textPane1);
+            }
+            friendList.add(friend);
+            friend.setBounds(0, 0, 309, 493);
+
+            {
+                // compute preferred size
+                Dimension preferredSize = new Dimension();
+                for(int i = 0; i < friendList.getComponentCount(); i++) {
+                    Rectangle bounds = friendList.getComponent(i).getBounds();
+                    preferredSize.width = Math.max(bounds.x + bounds.width, preferredSize.width);
+                    preferredSize.height = Math.max(bounds.y + bounds.height, preferredSize.height);
+                }
+                Insets insets = friendList.getInsets();
+                preferredSize.width += insets.right;
+                preferredSize.height += insets.bottom;
+                friendList.setMinimumSize(preferredSize);
+                friendList.setPreferredSize(preferredSize);
+            }
+        }
+        contentPane.add(friendList);
+        friendList.setBounds(75, 80, 309, 493);
+
+        //======== chatList ========
+        {
+            chatList.setBackground(Color.white);
+            chatList.setForeground(Color.white);
+            chatList.setLayout(null);
+
+            //======== chatRoom ========
+            {
+                chatRoom.setEnabled(false);
+
+                //---- textPane2 ----
+                textPane2.setEnabled(false);
+                chatRoom.setViewportView(textPane2);
+            }
+            chatList.add(chatRoom);
+            chatRoom.setBounds(0, 0, 309, 493);
+
+            {
+                // compute preferred size
+                Dimension preferredSize = new Dimension();
+                for(int i = 0; i < chatList.getComponentCount(); i++) {
+                    Rectangle bounds = chatList.getComponent(i).getBounds();
+                    preferredSize.width = Math.max(bounds.x + bounds.width, preferredSize.width);
+                    preferredSize.height = Math.max(bounds.y + bounds.height, preferredSize.height);
+                }
+                Insets insets = chatList.getInsets();
+                preferredSize.width += insets.right;
+                preferredSize.height += insets.bottom;
+                chatList.setMinimumSize(preferredSize);
+                chatList.setPreferredSize(preferredSize);
+            }
+        }
+        contentPane.add(chatList);
+        chatList.setBounds(75, 80, 309, 493);
 
         {
             // compute preferred size
@@ -328,12 +446,19 @@ public class ChatClientHome extends JFrame {
     }
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables  @formatter:off
-    private JPanel panel1;
+    private JPanel list;
     private JButton homeBtn;
     private JButton chatListBtn;
-    private JPanel panel3;
+    private JPanel friendHeader;
     private JLabel label3;
-    private JPanel panel2;
-    private JScrollPane scrollPane1;
+    private JPanel chatListHeader;
+    private JLabel label4;
+    private JButton createRoomBtn;
+    private JPanel friendList;
+    private JScrollPane friend;
+    private JTextPane textPane1;
+    private JPanel chatList;
+    private JScrollPane chatRoom;
+    private JTextPane textPane2;
     // JFormDesigner - End of variables declaration  //GEN-END:variables  @formatter:on
 }

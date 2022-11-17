@@ -9,8 +9,8 @@ import javax.swing.*;
 /**
  * @author unknown
  */
-public class friendPanel extends JPanel {
-    public friendPanel(ChatObject cm) {
+public class FriendPanel extends JPanel {
+    public FriendPanel(ChatObject cm) {
         initComponents();
         setVisible(true);
         this.name.setText(cm.UserName);
