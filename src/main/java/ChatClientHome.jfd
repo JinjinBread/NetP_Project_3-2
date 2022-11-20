@@ -102,7 +102,7 @@ new FormModel {
 					name: "friend"
 					"border": sfield com.jformdesigner.model.FormObject NULL_VALUE
 					add( new FormComponent( "javax.swing.JTextPane" ) {
-						name: "textPane1"
+						name: "homePane"
 						"enabled": false
 					} )
 				}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
@@ -124,9 +124,9 @@ new FormModel {
 				add( new FormContainer( "javax.swing.JScrollPane", new FormLayoutManager( class javax.swing.JScrollPane ) ) {
 					name: "chatRoom"
 					"enabled": false
+					"border": sfield com.jformdesigner.model.FormObject NULL_VALUE
 					add( new FormComponent( "javax.swing.JTextPane" ) {
-						name: "textPane2"
-						"enabled": false
+						name: "chatPane"
 					} )
 				}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
 					"x": 0

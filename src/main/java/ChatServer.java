@@ -20,7 +20,8 @@ public class ChatServer extends JFrame {
     private static final long serialVersionUID = 1L;
     private ServerSocket socket;
     private Socket client_socket;
-    private Vector UserVec = new Vector();
+    private Vector<UserService> UserVec = new Vector();
+    private String UserList = "";
     private static final int BUF_LEN = 128;
     public static void main(String[] args) {
         EventQueue.invokeLater(new Runnable() {
@@ -115,18 +116,21 @@ public class ChatServer extends JFrame {
             }
         }
 
-        public void Login() {
+        public void Login(Object ob) {
             AppendText("새로운 참가자 " + UserName + " 입장.");
-            WriteOne("Welcome to Java chat server\n");
-            WriteOne(UserName + "님 환영합니다.\n"); // 연결된 사용자에게 정상접속을 알림
-            String msg = "[" + UserName + "]님이 입장 하였습니다.\n";
-            WriteOthers(msg); // 아직 user_vc에 새로 입장한 user는 포함되지 않았다.
+//            WriteOne("Welcome to Java chat server\n");
+//            WriteOne(UserName + "님 환영합니다.\n"); // 연결된 사용자에게 정상접속을 알림
+//            String msg = "[" + UserName + "]님이 입장 하였습니다.\n";
+//            WriteOthers(msg); // 아직 user_vc에 새로 입장한 user는 포함되지 않았다.
+            WriteAllObject(ob);
         }
 
         public void Logout() {
             String msg = "[" + UserName + "]님이 퇴장 하였습니다.\n";
             UserVec.removeElement(this); // Logout한 현재 객체를 벡터에서 지운다
-            WriteAll(msg); // 나를 제외한 다른 User들에게 전송
+            //UserList = UserList.replace(this.UserName, ""); // Logout한 현재 객체를 리스트에서 지운다.
+            //WriteAll(msg); // 나를 제외한 다른 User들에게 전송
+//            WriteOthersObject(ob);
             AppendText("사용자 " + "[" + UserName + "] 퇴장. 현재 참가자 수 " + UserVec.size());
         }
 
@@ -138,6 +142,7 @@ public class ChatServer extends JFrame {
                     user.WriteOne(str);
             }
         }
+
         // 모든 User들에게 Object를 방송. 채팅 message와 image object를 보낼 수 있다
         public void WriteAllObject(Object ob) {
             for (int i = 0; i < user_vc.size(); i++) {
@@ -153,6 +158,14 @@ public class ChatServer extends JFrame {
                 UserService user = (UserService) user_vc.elementAt(i);
                 if (user != this && user.UserStatus == "O")
                     user.WriteOne(str);
+            }
+        }
+
+        public void WriteOthersObject(Object ob) {
+            for (int i = 0; i < user_vc.size(); i++) {
+                UserService user = (UserService) user_vc.elementAt(i);
+                if (user != this && user.UserStatus == "O")
+                    user.WriteOneObject(ob);
             }
         }
 
@@ -177,10 +190,6 @@ public class ChatServer extends JFrame {
         // UserService Thread가 담당하는 Client 에게 1:1 전송
         public void WriteOne(String msg) {
             try {
-                // dos.writeUTF(msg);
-//				byte[] bb;
-//				bb = MakePacket(msg);
-//				dos.write(bb, 0, bb.length);
                 ChatObject obcm = new ChatObject("SERVER", "200", msg);
                 oos.writeObject(obcm);
             } catch (IOException e) {
@@ -220,11 +229,11 @@ public class ChatServer extends JFrame {
                 Logout(); // 에러가난 현재 객체를 벡터에서 지운다
             }
         }
+
         public void WriteOneObject(Object ob) {
             try {
                 oos.writeObject(ob);
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 AppendText("oos.writeObject(ob) error");
                 try {
                     ois.close();
@@ -240,6 +249,11 @@ public class ChatServer extends JFrame {
                 Logout();
             }
         }
+
+//        public void vectorToString() {
+//            //UserList = String.format("%")
+//            UserList += String.format("%s ", UserVec.get(i).UserName);
+//        }
 
         public void run() {
             while (true) { // 사용자 접속을 계속해서 받기 위해 while문
@@ -263,10 +277,13 @@ public class ChatServer extends JFrame {
                         AppendObject(cm);
                     } else
                         continue;
-                    if (cm.code.matches("100")) {
+                    if (cm.code.matches("100")) { // 유저가 로그인했음
                         UserName = cm.UserName;
+                        //vectorToString(); // 업데이트된 UserVec와 UserList를 동기화시킴
                         UserStatus = "O"; // Online 상태
-                        Login();
+                        UserList += String.format("%s ", UserName);
+                        cm.userlist = UserList;
+                        Login(cm);
                     } else if (cm.code.matches("200")) {
                         msg = String.format("[%s] %s", cm.UserName, cm.data);
                         AppendText(msg); // server 화면에 출력

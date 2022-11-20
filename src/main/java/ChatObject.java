@@ -1,4 +1,5 @@
 import javax.swing.*;
+import java.awt.*;
 import java.io.Serializable;
 import java.util.Vector;
 
@@ -12,7 +13,7 @@ public class ChatObject implements Serializable {
     public String status = null;
     public int room_id;
     public boolean isOnline;
-    public Vector<ChatClientHome> userlist;
+    public String userlist = "";
 
     public ChatObject(String UserName, String code, String msg) {
         this.code = code;
@@ -20,7 +21,7 @@ public class ChatObject implements Serializable {
         this.data = msg;
     }
 
-    public ChatObject(String code, int room_id, Vector<ChatClientHome> userlist) {
+    public ChatObject(String code, int room_id, String userlist) {
         this.code = code;
         this.room_id = room_id;
         this.userlist = userlist;

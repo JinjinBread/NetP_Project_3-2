@@ -6,7 +6,9 @@ import java.io.ObjectOutputStream;
 import java.io.Serial;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
+import java.util.Vector;
 import javax.swing.*;
+import javax.swing.text.BadLocationException;
 /*
  * Created by JFormDesigner on Sat Nov 12 00:56:04 KST 2022
  */
@@ -16,10 +18,10 @@ import javax.swing.*;
 /**
  * @author unknown
  */
+
 public class ChatClientHome extends JFrame {
     @Serial
     private static final long serialVersionUID = 1L;
-    private static final int BUF_LEN = 128;
     //private ChatClientChatRoom chatRoom = ChatClientChatRoom();
     private final ChatClientHome mainview = this;
     private String UserName;
@@ -32,17 +34,34 @@ public class ChatClientHome extends JFrame {
     private String name;
     private String ip;
     private String port;
+    private Vector<String> addedUserList = new Vector();
+//    private Vector<FriendPanel> addedFriendPanel  = new Vector();
     public ChatClientHome(String name, String ip, String port) {
         this.name = name; this.ip = ip; this.port = port;
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         initComponents();
+
+        try {
+            homePane.getDocument().insertString(homePane.getDocument().getLength(), " ", null);
+        } catch(BadLocationException ex1){
+            // Ignore
+        }
+        try {
+            homePane.setCaretPosition(homePane.getDocument().getLength()-1);
+        } catch(Exception ex){
+            homePane.setCaretPosition(0);
+        }
+
         chatListHeader.setVisible(false);
         chatList.setVisible(false);
         setVisible(true);
         homeBtn.setContentAreaFilled(false); homeBtn.setFocusPainted(false);
         chatListBtn.setContentAreaFilled(false); chatListBtn.setFocusPainted(false);
+        createRoomBtn.setContentAreaFilled(false); createRoomBtn.setFocusPainted(false);
 
         UserName = name;
+        addedUserList.add(UserName);
+        homePane.insertComponent(new FriendPanel(UserName));
 
         try {
             socket = new Socket(ip, Integer.parseInt(port));
@@ -75,21 +94,46 @@ public class ChatClientHome extends JFrame {
                         obcm = ois.readObject();
                     } catch (ClassNotFoundException e) {
                         // TODO Auto-generated catch block
-                        e.printStackTrace();
+                        // X 버튼을 누르고 강제 종료한 경우 친구 목록에서 실시간으로 빼는 작업 <-- 구현해야 함.
+                        addedUserList.remove(UserName);
+                        cm = new ChatObject(UserName, "400", "Force Shutdown");
+                        SendObject(cm);
+                        //e.printStackTrace();
                         break;
                     }
                     if (obcm == null)
                         break;
                     if (obcm instanceof ChatObject) {
                         cm = (ChatObject) obcm;
-                        chatRoom.setViewportView(new FriendPanel(cm));
-                        validate();
+                        // chatRoom.setViewportView(new FriendPanel(cm));
+                        // validate();
                         // 출력 format
-                        //msg = String.format(" [%s]\n%s", cm.UserName, cm.data);
-                    } // else
+                        msg = String.format(" [%s]\n%s", cm.UserName, cm.data);
+                    } else
                         continue;
-//                    switch (cm.code) {
-//                        case "200": // chat message
+                    switch (cm.code) {
+                        case "100":
+                            String[] user = cm.userlist.split(" ");
+                            for (int i = 0; i < user.length; i++) { // 문제. 이미 생성한 panel을 또 중복해서 생성하기 때문에 user가 중복돼서 나타남
+                                if (user[i].equals(UserName) || addedUserList.contains(user[i])) // 이미 추가된 user와 자기 자신은 생성하지 않음.
+                                    continue;
+                                homePane.insertComponent(new FriendPanel(user[i]));
+                                addedUserList.add(user[i]);
+                            }
+                            break;
+//                            if (cm.UserName.equals(UserName))
+//                                break;
+//                            homePane.insertComponent(new FriendPanel(cm.UserName));
+//                            String[] user = cm.userlist.split(" ");
+//                            for (int i = 0; i < user.length; i++) { // 문제. 이미 생성한 panel을 또 중복해서 생성하기 때문에 user가 중복돼서 나타남
+//                                if (cm.userlist.contains(user[i]))
+//                                    continue;
+//                                if (user[i].equals(UserName))
+//                                    continue;
+//                                FriendPanel temp = new FriendPanel(cm.UserName);
+//                                homePane.insertComponent(new FriendPanel(cm.UserName));
+                                // homePane.removeAll();
+                        case "200": // chat message
 //                            if (cm.UserName.equals(UserName))
 //                                AppendTextR(msg); // 내 메세지는 우측에
 //                            else if (cm.UserName.equals("SERVER"))
@@ -97,7 +141,7 @@ public class ChatClientHome extends JFrame {
 //                            else
 //                                AppendTextL(msg);
 //                            break;
-//                        case "300": // Image 첨부
+                        case "300": // Image 첨부
 //                            if (cm.UserName.equals(UserName))
 //                                AppendTextR("[" + cm.UserName + "]");
 //                            else if (cm.UserName.equals("SERVER"))
@@ -109,14 +153,13 @@ public class ChatClientHome extends JFrame {
 //                        case "500": // Mouse Event 수신
 //                            DoMouseEvent(cm);
 //                            break;
-//                    }
+                    }
                 } catch (IOException e) {
                     JOptionPane.showMessageDialog(null, "ois.readObject() error", "ERROR MESSAGE", JOptionPane.ERROR_MESSAGE);
                     try {
                         ois.close();
                         oos.close();
                         socket.close();
-
                         break;
                     } catch (Exception ee) {
                         break;
@@ -180,6 +223,7 @@ public class ChatClientHome extends JFrame {
 
     private void createRoom(MouseEvent e) {
         // TODO add your code here
+
     }
 
     private void homeBtnMouseClicked(MouseEvent e) { // 홈화면( == 친구 목록 화면)으로 이동
@@ -202,10 +246,10 @@ public class ChatClientHome extends JFrame {
         createRoomBtn = new JButton();
         friendList = new JPanel();
         friend = new JScrollPane();
-        textPane1 = new JTextPane();
+        homePane = new JTextPane();
         chatList = new JPanel();
         chatRoom = new JScrollPane();
-        textPane2 = new JTextPane();
+        chatPane = new JTextPane();
 
         //======== this ========
         setResizable(false);
@@ -366,9 +410,9 @@ public class ChatClientHome extends JFrame {
             {
                 friend.setBorder(null);
 
-                //---- textPane1 ----
-                textPane1.setEnabled(false);
-                friend.setViewportView(textPane1);
+                //---- homePane ----
+                homePane.setEnabled(false);
+                friend.setViewportView(homePane);
             }
             friendList.add(friend);
             friend.setBounds(0, 0, 309, 493);
@@ -400,10 +444,8 @@ public class ChatClientHome extends JFrame {
             //======== chatRoom ========
             {
                 chatRoom.setEnabled(false);
-
-                //---- textPane2 ----
-                textPane2.setEnabled(false);
-                chatRoom.setViewportView(textPane2);
+                chatRoom.setBorder(null);
+                chatRoom.setViewportView(chatPane);
             }
             chatList.add(chatRoom);
             chatRoom.setBounds(0, 0, 309, 493);
@@ -456,9 +498,9 @@ public class ChatClientHome extends JFrame {
     private JButton createRoomBtn;
     private JPanel friendList;
     private JScrollPane friend;
-    private JTextPane textPane1;
+    private JTextPane homePane;
     private JPanel chatList;
     private JScrollPane chatRoom;
-    private JTextPane textPane2;
+    private JTextPane chatPane;
     // JFormDesigner - End of variables declaration  //GEN-END:variables  @formatter:on
 }
