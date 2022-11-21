@@ -29,12 +29,16 @@ public class ChatClientChatRoom extends JFrame {
     private String UserName;
     private FileDialog fd;
     private ChatClientHome mainview;
+    private int room_id; // 이 ChatRoom의 room_id
     private SimpleDateFormat dateFormat = new SimpleDateFormat(" aa kk:mm");
 
-    public ChatClientChatRoom() {
+    public ChatClientChatRoom(ChatClientHome mainview, int room_id) {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
         initComponents();
+
+        this.mainview = mainview;
+        this.room_id = room_id;
 
         menu.setContentAreaFilled(false); emoticonBtn.setContentAreaFilled(false); fileBtn.setContentAreaFilled(false);
         menu.setFocusPainted(false); emoticonBtn.setFocusPainted(false); fileBtn.setFocusPainted(false);
@@ -155,7 +159,7 @@ public class ChatClientChatRoom extends JFrame {
 //        }
 //    }
 
-    // keyboard enter key 치면 서버로 전송
+    // JTextArea는 ActionListener가 안되므로 마우스로 전송버튼을 누르는 것과 엔터치는 것을 나눔
     class TextSendAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -164,13 +168,15 @@ public class ChatClientChatRoom extends JFrame {
                 String msg = null;
                 // msg = String.format("[%s] %s\n", UserName, txtInput.getText());
                 msg = txtInput.getText();
-                mainview.SendMessage(msg);
+                ChatObject obcm = new ChatObject(UserName, "200", msg, room_id);
+                mainview.SendObject(obcm);
                 txtInput.setText(""); // 메세지를 보내고 나면 메세지 쓰는창을 비운다.
                 txtInput.requestFocus(); // 메세지를 보내고 커서를 다시 텍스트 필드로 위치시킨다
             }
         }
     }
 
+    // keyboard enter key 치면 서버로 전송
     class TextSendKeyAction extends KeyAdapter {
         @Override
         public void keyPressed(KeyEvent e) {
@@ -180,7 +186,8 @@ public class ChatClientChatRoom extends JFrame {
                 String msg = null;
                 // msg = String.format("[%s] %s\n", UserName, txtInput.getText());
                 msg = txtInput.getText();
-                mainview.SendMessage(msg);
+                ChatObject obcm = new ChatObject(UserName, "200", msg, room_id);
+                mainview.SendObject(obcm);
                 txtInput.setText(""); // 메세지를 보내고 나면 메세지 쓰는창을 비운다.
                 txtInput.requestFocus(); // 메세지를 보내고 커서를 다시 텍스트 필드로 위치시킨다
             }

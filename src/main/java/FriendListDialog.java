@@ -1,3 +1,5 @@
+import panel.DialogFriendPanel;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.util.Vector;
@@ -12,7 +14,7 @@ import javax.swing.*;
  * @author unknown
  */
 public class FriendListDialog extends JDialog {
-    private Vector<DialogFriend> dialogFriends = new Vector<>();
+    private Vector<DialogFriendPanel> dialogFriendPanels = new Vector<>();
     private ChatClientHome mainview;
     private Vector<String> friendList;
     public FriendListDialog(ChatClientHome mainview, Vector<String> friendList) {
@@ -22,8 +24,8 @@ public class FriendListDialog extends JDialog {
         this.friendList = friendList;
         if (friendList.size() > 0) { // 자기 자신만 온라인인 경우는 목록에 아무도 띄우지 않음
             for (int i = 1; i < friendList.size(); i++) { // friendList.get(0)은 자기 자신이므로 1부터 시작
-                DialogFriend temp = new DialogFriend(friendList.get(i));
-                dialogFriends.add(temp);
+                DialogFriendPanel temp = new DialogFriendPanel(friendList.get(i));
+                dialogFriendPanels.add(temp);
                 textPane1.insertComponent(temp);
             }
         }
@@ -31,14 +33,13 @@ public class FriendListDialog extends JDialog {
 
     private void okMouseClicked(MouseEvent e) {
         // TODO add your code here
-        String checkedClient = "";
-        String username = friendList.get(0); // 자기 자신
-        for(int i = 0; i < dialogFriends.size(); i++) {
-            if (dialogFriends.get(i).isSelected()) {
-                checkedClient += String.format("%s ", dialogFriends.get(i).getName());
+        String checkedClient = String.format("%s ", friendList.get(0)); // 자기 자신
+        for(int i = 0; i < dialogFriendPanels.size(); i++) {
+            if (dialogFriendPanels.get(i).isSelected()) {
+                checkedClient += String.format("%s ", dialogFriendPanels.get(i).getName());
             }
 
-            ChatObject obcm = new ChatObject(username, "500", checkedClient);
+            ChatObject obcm = new ChatObject("500", checkedClient);
             mainview.SendObject(obcm);
         }
         this.dispose();

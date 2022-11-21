@@ -5,44 +5,41 @@ new FormModel {
 	root: new FormRoot {
 		add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.jformdesigner.runtime.NullLayout ) ) {
 			name: "this"
-			"background": new java.awt.Color( 255, 255, 255, 255 )
-			addEvent( new FormEvent( "java.awt.event.MouseListener", "mouseClicked", "ChatRoomMouseClicked", true ) )
 			add( new FormComponent( "javax.swing.JLabel" ) {
 				name: "profile"
 			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
-				"x": 20
-				"y": 20
-				"width": 55
-				"height": 55
+				"x": 15
+				"y": 10
+				"width": 45
+				"height": 45
 			} )
 			add( new FormComponent( "javax.swing.JLabel" ) {
-				name: "users"
-				"font": new com.jformdesigner.model.SwingDerivedFont( null, 1, 13, true )
+				name: "name"
 			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
-				"x": 85
-				"y": 20
-				"width": 130
+				"x": 70
+				"y": 10
+				"width": 200
 				"height": 20
 			} )
 			add( new FormComponent( "javax.swing.JLabel" ) {
-				name: "chatting"
+				name: "chat"
 			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
-				"x": 85
-				"y": 45
-				"width": 150
+				"x": 70
+				"y": 40
+				"width": 195
 				"height": 30
 			} )
 			add( new FormComponent( "javax.swing.JLabel" ) {
 				name: "time"
 			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
-				"x": 245
-				"y": 20
-				"width": 50
+				"x": 280
+				"y": 50
 				"height": 20
+				"width": 60
 			} )
 		}, new FormLayoutConstraints( null ) {
 			"location": new java.awt.Point( 0, 0 )
-			"size": new java.awt.Dimension( 309, 95 )
+			"size": new java.awt.Dimension( 365, 85 )
 		} )
 	}
 }

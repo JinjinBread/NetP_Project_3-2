@@ -1,3 +1,5 @@
+package panel;
+
 import java.awt.*;
 import javax.swing.*;
 /*
@@ -25,6 +27,10 @@ public class FriendPanel extends JPanel {
         Image resizedImg = img.getScaledInstance(50, 50, Image.SCALE_SMOOTH);
         ImageIcon resizedIcon = new ImageIcon(resizedImg);
         this.profile.setIcon(resizedIcon);
+    }
+
+    public void setStatus(String status) {
+        this.status.setText(status);
     }
 
     private void initComponents() {

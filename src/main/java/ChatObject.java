@@ -8,13 +8,14 @@ public class ChatObject implements Serializable {
     private static final long serialVersionUID = 1L;
     public String code; // 100:로그인, 400:로그아웃, 200:채팅메시지, 300:Image, 500: Mouse Event
     public String UserName;
-    public String data; // msg와 userlist를 운반하는 변수
+    public String data;
     public ImageIcon img;
-    public String status = null;
+    public String status;
     public int room_id;
     public boolean isOnline;
     public String userlist = "";
 
+    public ChatObject() {};
     public ChatObject(String UserName, String code, String msg) {
         this.code = code;
         this.UserName = UserName;
@@ -30,5 +31,12 @@ public class ChatObject implements Serializable {
         this.code = code;
         this.room_id = room_id;
         this.userlist = userlist;
+    }
+
+    public ChatObject(String UserName, String code, String msg, int room_id) {
+        this.code = code;
+        this.UserName = UserName;
+        this.data = msg;
+        this.room_id = room_id;
     }
 }

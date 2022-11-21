@@ -1,3 +1,5 @@
+import panel.FriendPanel;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
@@ -8,7 +10,6 @@ import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.Vector;
 import javax.swing.*;
-import javax.swing.text.BadLocationException;
 /*
  * Created by JFormDesigner on Sat Nov 12 00:56:04 KST 2022
  */
@@ -28,30 +29,32 @@ public class ChatClientHome extends JFrame {
     private Socket socket;
     private ObjectInputStream ois;
     private ObjectOutputStream oos;
-    private SimpleDateFormat dateFormat = new SimpleDateFormat(" aa kk:mm");
+    private SimpleDateFormat dateFormat = new SimpleDateFormat("aa hh:mm"); // 채팅이 올 때마다 다시 받아서 다시 그려줌
 
     private String name;
     private String ip;
     private String port;
-    private int room; //  방 id
     private Vector<String> addedUserList = new Vector();
-    private Vector<ChatRoom> RoomVec = new Vector(); // 현재 유저가 들어가있는 채팅방을 관리하는 변수
+    private Vector<ChatRoom> RoomVec = new Vector(); // 현재 유저가 들어가있는 채팅방을 관리
     private String lastChat = ""; // 가장 마지막에 입력한 채팅
+    private Vector<ChatRoomPanel> RoomPanelVec = new Vector<>(); // 현재 유저가 들어가있는 채팅방 패널을 관리(시간, 마지막 채팅 관리)
+    private ChatObject myObject = new ChatObject();
+//    private int room; // 방 id
     public ChatClientHome(String name, String ip, String port) {
         this.name = name; this.ip = ip; this.port = port;
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         initComponents();
 
-        try {
-            homePane.getDocument().insertString(homePane.getDocument().getLength(), " ", null);
-        } catch(BadLocationException ex1){
-            // Ignore
-        }
-        try {
-            homePane.setCaretPosition(homePane.getDocument().getLength()-1);
-        } catch(Exception ex){
-            homePane.setCaretPosition(0);
-        }
+//        try {
+//            homePane.getDocument().insertString(homePane.getDocument().getLength(), " ", null);
+//        } catch(BadLocationException ex1){
+//            // Ignore
+//        }
+//        try {
+//            homePane.setCaretPosition(homePane.getDocument().getLength()-1);
+//        } catch(Exception ex){
+//            homePane.setCaretPosition(0);
+//        }
 
         chatListHeader.setVisible(false);
         chatList.setVisible(false);
@@ -61,6 +64,7 @@ public class ChatClientHome extends JFrame {
         createRoomBtn.setContentAreaFilled(false); createRoomBtn.setFocusPainted(false);
 
         UserName = name;
+        //myObject.UserName = name;
         addedUserList.add(UserName);
         homePane.insertComponent(new FriendPanel(UserName));
 
@@ -123,6 +127,8 @@ public class ChatClientHome extends JFrame {
                             }
                             break;
                         case "200": // chat message
+//                            RoomPanelVec.get(n).room_id와 cm.room_id가 일치하는 panel의 profile, time, lastChat을 변경함.
+                            // 방 id와
 //                            if (cm.UserName.equals(UserName))
 //                                room.AppendTextR(msg); // 내 메세지는 우측에
 //                            else if (cm.UserName.equals("SERVER"))
@@ -141,8 +147,18 @@ public class ChatClientHome extends JFrame {
 //                            break;
                         case "510":
                             ChatRoom temp = new ChatRoom(cm.room_id, cm.userlist);
-                            RoomVec.add(temp);
-                            chatPane.insertComponent(new ChatRoomPanel(mainview, cm.userlist, lastChat));
+                            RoomVec.add(temp); // 자신이 입장해있는 채팅방을 추가해줌
+                            String[] users = cm.userlist.split(" ");
+                            String tempUserList = "";
+                            for(int i = 0; i < users.length; i++) {
+                                if (users[i].equals(UserName))
+                                    continue;
+                                tempUserList += String.format("%s ", users[i]); // '나'를 제외한 채팅방에 참가한 유저들의 리스트만 보내기 위함 (채팅방 제목에 사용)
+                            }
+                            ChatRoomPanel tempRoomPanel = new ChatRoomPanel(mainview, tempUserList, cm.room_id);
+                            RoomPanelVec.add(tempRoomPanel);
+                            chatPane.insertComponent(tempRoomPanel);
+                            break;
 //                        case "500": // Mouse Event 수신
 //                            DoMouseEvent(cm);
 //                            break;
@@ -164,27 +180,27 @@ public class ChatClientHome extends JFrame {
     }
 
     // Server에게 network으로 전송
-    public void SendMessage(String msg) {
-        try {
-            // dos.writeUTF(msg);
-//			byte[] bb;
-//			bb = MakePacket(msg);
-//			dos.write(bb, 0, bb.length);
-            ChatObject obcm = new ChatObject(UserName, "200", msg);
-            oos.writeObject(obcm);
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(null, "oos.writeObject() error", "ERROR MESSAGE", JOptionPane.ERROR_MESSAGE);
-            try {
-                ois.close();
-                oos.close();
-                socket.close();
-            } catch (IOException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
-                System.exit(0);
-            }
-        }
-    }
+//    public void SendMessage(String msg, int room_id) {
+//        try {
+//            // dos.writeUTF(msg);
+////			byte[] bb;
+////			bb = MakePacket(msg);
+////			dos.write(bb, 0, bb.length);
+//            ChatObject obcm = new ChatObject(UserName, "200", msg, room_id);
+//            oos.writeObject(obcm);
+//        } catch (IOException e) {
+//            JOptionPane.showMessageDialog(null, "oos.writeObject() error", "ERROR MESSAGE", JOptionPane.ERROR_MESSAGE);
+//            try {
+//                ois.close();
+//                oos.close();
+//                socket.close();
+//            } catch (IOException e1) {
+//                // TODO Auto-generated catch block
+//                e1.printStackTrace();
+//                System.exit(0);
+//            }
+//        }
+//    }
 
     public void SendObject(Object ob) { // 서버로 메세지를 보내는 메소드
         try {
@@ -195,9 +211,9 @@ public class ChatClientHome extends JFrame {
         }
     }
 
-    public void setRoomID(int room) {
-        this.room = room;
-    }
+//    public void setRoomID(int room) {
+//        this.room = room;
+//    }
     public String getUserName() {
         return UserName;
     }

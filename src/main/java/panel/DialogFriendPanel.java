@@ -1,3 +1,5 @@
+package panel;
+
 import java.awt.*;
 import javax.swing.*;
 /*
@@ -9,8 +11,8 @@ import javax.swing.*;
 /**
  * @author unknown
  */
-public class DialogFriend extends JPanel {
-    public DialogFriend(String name) {
+public class DialogFriendPanel extends JPanel {
+    public DialogFriendPanel(String name) {
         initComponents();
         this.friend.setText(name);
 

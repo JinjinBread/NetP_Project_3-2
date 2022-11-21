@@ -338,6 +338,7 @@ public class ChatServer extends JFrame {
                         RoomVec.add(temp);
                         ChatObject co = new ChatObject("510", RoomID, cm.userlist);
                         String[] users = cm.userlist.split(" ");
+                        // 현재 온라인 중인 유저들 중에 선택된 유저들에게만 ChatObject를 보냄
                         for (int i = 0; i < user_vc.size(); i++) {
                             UserService usTemp = (UserService) user_vc.elementAt(i);
                             for (int j = 0; j < users.length; j++)
