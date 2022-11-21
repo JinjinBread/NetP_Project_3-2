@@ -30,12 +30,13 @@ public class ChatClientHome extends JFrame {
     private ObjectOutputStream oos;
     private SimpleDateFormat dateFormat = new SimpleDateFormat(" aa kk:mm");
 
-    private List RoomID = new List(); // ChatRoomID를 저장하는 자료구조
     private String name;
     private String ip;
     private String port;
+    private int room; //  방 id
     private Vector<String> addedUserList = new Vector();
-//    private Vector<FriendPanel> addedFriendPanel  = new Vector();
+    private Vector<ChatRoom> RoomVec = new Vector(); // 현재 유저가 들어가있는 채팅방을 관리하는 변수
+    private String lastChat = ""; // 가장 마지막에 입력한 채팅
     public ChatClientHome(String name, String ip, String port) {
         this.name = name; this.ip = ip; this.port = port;
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -121,23 +122,11 @@ public class ChatClientHome extends JFrame {
                                 addedUserList.add(user[i]);
                             }
                             break;
-//                            if (cm.UserName.equals(UserName))
-//                                break;
-//                            homePane.insertComponent(new FriendPanel(cm.UserName));
-//                            String[] user = cm.userlist.split(" ");
-//                            for (int i = 0; i < user.length; i++) { // 문제. 이미 생성한 panel을 또 중복해서 생성하기 때문에 user가 중복돼서 나타남
-//                                if (cm.userlist.contains(user[i]))
-//                                    continue;
-//                                if (user[i].equals(UserName))
-//                                    continue;
-//                                FriendPanel temp = new FriendPanel(cm.UserName);
-//                                homePane.insertComponent(new FriendPanel(cm.UserName));
-                                // homePane.removeAll();
                         case "200": // chat message
 //                            if (cm.UserName.equals(UserName))
-//                                AppendTextR(msg); // 내 메세지는 우측에
+//                                room.AppendTextR(msg); // 내 메세지는 우측에
 //                            else if (cm.UserName.equals("SERVER"))
-//                                AppendTextC(msg);
+//                                room.AppendTextC(msg);
 //                            else
 //                                AppendTextL(msg);
 //                            break;
@@ -150,6 +139,10 @@ public class ChatClientHome extends JFrame {
 //                                AppendTextL("[" + cm.UserName + "]");
 //                            AppendImage(cm.img);
 //                            break;
+                        case "510":
+                            ChatRoom temp = new ChatRoom(cm.room_id, cm.userlist);
+                            RoomVec.add(temp);
+                            chatPane.insertComponent(new ChatRoomPanel(mainview, cm.userlist, lastChat));
 //                        case "500": // Mouse Event 수신
 //                            DoMouseEvent(cm);
 //                            break;
@@ -202,6 +195,12 @@ public class ChatClientHome extends JFrame {
         }
     }
 
+    public void setRoomID(int room) {
+        this.room = room;
+    }
+    public String getUserName() {
+        return UserName;
+    }
     private void mouseEntered(MouseEvent e) {
         // TODO add your code here
         this.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -223,7 +222,8 @@ public class ChatClientHome extends JFrame {
 
     private void createRoom(MouseEvent e) {
         // TODO add your code here
-
+        FriendListDialog friendListDialog = new FriendListDialog(mainview, addedUserList);
+        friendListDialog.setVisible(true);
     }
 
     private void homeBtnMouseClicked(MouseEvent e) { // 홈화면( == 친구 목록 화면)으로 이동

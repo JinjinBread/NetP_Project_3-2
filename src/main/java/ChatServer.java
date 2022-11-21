@@ -22,6 +22,8 @@ public class ChatServer extends JFrame {
     private Socket client_socket;
     private Vector<UserService> UserVec = new Vector();
     private String UserList = "";
+    private int RoomID = 0;
+    private Vector<ChatRoom> RoomVec = new Vector();
     private static final int BUF_LEN = 128;
     public static void main(String[] args) {
         EventQueue.invokeLater(new Runnable() {
@@ -88,6 +90,8 @@ public class ChatServer extends JFrame {
         textArea.append("code = " + msg.code + "\n");
         textArea.append("id = " + msg.UserName + "\n");
         textArea.append("data = " + msg.data + "\n");
+        textArea.append("room_id = " + msg.room_id + "\n");
+        textArea.append("user_list = " + msg.userlist + "\n");
         textArea.setCaretPosition(textArea.getText().length());
     }
 
@@ -250,10 +254,9 @@ public class ChatServer extends JFrame {
             }
         }
 
-//        public void vectorToString() {
-//            //UserList = String.format("%")
-//            UserList += String.format("%s ", UserVec.get(i).UserName);
-//        }
+        private String getUserName() {
+            return this.UserName;
+        }
 
         public void run() {
             while (true) { // 사용자 접속을 계속해서 받기 위해 while문
@@ -330,6 +333,17 @@ public class ChatServer extends JFrame {
                     } else if (cm.code.matches("400")) { // logout message 처리
                         Logout();
                         break;
+                    } else if (cm.code.matches("500")) { // 채팅방 생성 요청
+                        ChatRoom temp = new ChatRoom(RoomID++, cm.userlist);
+                        RoomVec.add(temp);
+                        ChatObject co = new ChatObject("510", RoomID, cm.userlist);
+                        String[] users = cm.userlist.split(" ");
+                        for (int i = 0; i < user_vc.size(); i++) {
+                            UserService usTemp = (UserService) user_vc.elementAt(i);
+                            for (int j = 0; j < users.length; j++)
+                                if (usTemp.getUserName().equals(users[j]))
+                                    usTemp.WriteOneObject(co);
+                        }
                     } else { // 300, 500, ... 기타 object는 모두 방송한다.
                         WriteAllObject(cm);
                     }

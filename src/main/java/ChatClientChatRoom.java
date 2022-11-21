@@ -31,13 +31,10 @@ public class ChatClientChatRoom extends JFrame {
     private ChatClientHome mainview;
     private SimpleDateFormat dateFormat = new SimpleDateFormat(" aa kk:mm");
 
-    public ChatClientChatRoom(ChatClientHome mainview, String name, String ip, String port) {
+    public ChatClientChatRoom() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
         initComponents();
-        this.mainview = mainview;
-        AppendTextC("User " + name + " connecting " + ip + " " + port);
-        UserName = name;
 
         menu.setContentAreaFilled(false); emoticonBtn.setContentAreaFilled(false); fileBtn.setContentAreaFilled(false);
         menu.setFocusPainted(false); emoticonBtn.setFocusPainted(false); fileBtn.setFocusPainted(false);
@@ -49,7 +46,7 @@ public class ChatClientChatRoom extends JFrame {
             }
         });
 
-        exitItem.addActionListener(new ActionListener() {
+        exitItem.addActionListener(new ActionListener() { // 나가기 메뉴아이템
             @Override
             public void actionPerformed(ActionEvent e) {
                 ChatObject obcm = new ChatObject(UserName, "400", "Bye");
