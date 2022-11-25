@@ -152,7 +152,7 @@ public class ChatClientMain extends JFrame {
             String username = name.getText().trim();
             String ip_addr = ip.getText().trim();
             String port_no = port.getText().trim();
-            ChatClientHome view = new ChatClientHome(username, ip_addr, port_no);
+            ChatClientMainView view = new ChatClientMainView(username, ip_addr, port_no);
             setVisible(false);
         }
     }

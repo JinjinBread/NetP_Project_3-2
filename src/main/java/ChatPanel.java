@@ -1,4 +1,6 @@
 import java.awt.*;
+import java.awt.geom.Ellipse2D;
+import java.awt.image.BufferedImage;
 import javax.swing.*;
 /*
  * Created by JFormDesigner on Mon Nov 21 22:32:36 KST 2022
@@ -10,8 +12,22 @@ import javax.swing.*;
  * @author unknown
  */
 public class ChatPanel extends JPanel {
-    public ChatPanel() {
+    private static final long serialVersionUID = 1L;
+    public ChatPanel(ImageIcon img, String username, String msg) {
         initComponents();
+        resizedProfile(img);
+        this.name.setText(username);
+        this.chat.setText(msg);
+    }
+
+    private void resizedProfile(ImageIcon icon) {
+        int width = 40;
+        BufferedImage circleBuffer = new BufferedImage(width, width, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = circleBuffer.createGraphics();
+        g2.setClip(new Ellipse2D.Float(0, 0, width, width));
+        g2.drawImage(icon.getImage(), 0, 0, width, width, null);
+
+        profile.setIcon(new ImageIcon(circleBuffer));
     }
 
     private void initComponents() {
