@@ -30,6 +30,8 @@ public class ChatClientMain extends JFrame {
     public ChatClientMain() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         initComponents();
+        Image img = new ImageIcon("resources/logo.png").getImage().getScaledInstance(logo.getWidth(), logo.getHeight(), Image.SCALE_SMOOTH);
+        logo.setIcon(new ImageIcon(img));
         MyAction action = new MyAction();
         connect.addActionListener(action);
         name.addActionListener(action);
@@ -77,9 +79,9 @@ public class ChatClientMain extends JFrame {
             port.setBounds(160, 420, 155, 30);
 
             //---- connect ----
-            connect.setText("Connect");
+            connect.setText("\ub85c\uadf8\uc778");
             panel1.add(connect);
-            connect.setBounds(140, 490, 100, 30);
+            connect.setBounds(70, 480, 245, 35);
 
             //---- userName ----
             userName.setText("User Name");
@@ -95,39 +97,11 @@ public class ChatClientMain extends JFrame {
             portNumber.setText("Port Number");
             panel1.add(portNumber);
             portNumber.setBounds(75, 423, 80, 20);
-
-            {
-                // compute preferred size
-                Dimension preferredSize = new Dimension();
-                for(int i = 0; i < panel1.getComponentCount(); i++) {
-                    Rectangle bounds = panel1.getComponent(i).getBounds();
-                    preferredSize.width = Math.max(bounds.x + bounds.width, preferredSize.width);
-                    preferredSize.height = Math.max(bounds.y + bounds.height, preferredSize.height);
-                }
-                Insets insets = panel1.getInsets();
-                preferredSize.width += insets.right;
-                preferredSize.height += insets.bottom;
-                panel1.setMinimumSize(preferredSize);
-                panel1.setPreferredSize(preferredSize);
-            }
         }
         contentPane.add(panel1);
         panel1.setBounds(0, 0, 385, 572);
 
-        {
-            // compute preferred size
-            Dimension preferredSize = new Dimension();
-            for(int i = 0; i < contentPane.getComponentCount(); i++) {
-                Rectangle bounds = contentPane.getComponent(i).getBounds();
-                preferredSize.width = Math.max(bounds.x + bounds.width, preferredSize.width);
-                preferredSize.height = Math.max(bounds.y + bounds.height, preferredSize.height);
-            }
-            Insets insets = contentPane.getInsets();
-            preferredSize.width += insets.right;
-            preferredSize.height += insets.bottom;
-            contentPane.setMinimumSize(preferredSize);
-            contentPane.setPreferredSize(preferredSize);
-        }
+        contentPane.setPreferredSize(new Dimension(385, 602));
         pack();
         setLocationRelativeTo(getOwner());
         // JFormDesigner - End of component initialization  //GEN-END:initComponents  @formatter:on

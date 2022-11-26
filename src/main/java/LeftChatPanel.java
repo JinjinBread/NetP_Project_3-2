@@ -3,7 +3,7 @@ import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import javax.swing.*;
 /*
- * Created by JFormDesigner on Mon Nov 21 22:32:36 KST 2022
+ * Created by JFormDesigner on Sat Nov 26 02:33:45 KST 2022
  */
 
 
@@ -11,9 +11,10 @@ import javax.swing.*;
 /**
  * @author unknown
  */
-public class ChatPanel extends JPanel {
+public class LeftChatPanel extends JPanel {
     private static final long serialVersionUID = 1L;
-    public ChatPanel(ImageIcon img, String username, String msg) {
+
+    public LeftChatPanel(ImageIcon img, String username, String msg) {
         initComponents();
         resizedProfile(img);
         this.name.setText(username);
@@ -48,20 +49,7 @@ public class ChatPanel extends JPanel {
         add(time);
         time.setBounds(280, 50, 60, 20);
 
-        {
-            // compute preferred size
-            Dimension preferredSize = new Dimension();
-            for(int i = 0; i < getComponentCount(); i++) {
-                Rectangle bounds = getComponent(i).getBounds();
-                preferredSize.width = Math.max(bounds.x + bounds.width, preferredSize.width);
-                preferredSize.height = Math.max(bounds.y + bounds.height, preferredSize.height);
-            }
-            Insets insets = getInsets();
-            preferredSize.width += insets.right;
-            preferredSize.height += insets.bottom;
-            setMinimumSize(preferredSize);
-            setPreferredSize(preferredSize);
-        }
+        setPreferredSize(new Dimension(365, 85));
         // JFormDesigner - End of component initialization  //GEN-END:initComponents  @formatter:on
     }
 

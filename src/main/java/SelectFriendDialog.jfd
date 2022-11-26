@@ -8,6 +8,8 @@ new FormModel {
 		} ) {
 			name: "this"
 			"background": new java.awt.Color( 255, 255, 255, 255 )
+			"modal": true
+			"resizable": false
 			add( new FormContainer( "javax.swing.JScrollPane", new FormLayoutManager( class javax.swing.JScrollPane ) ) {
 				name: "scrollPane1"
 				"border": sfield com.jformdesigner.model.FormObject NULL_VALUE
@@ -16,11 +18,12 @@ new FormModel {
 					name: "listPane"
 					"border": sfield com.jformdesigner.model.FormObject NULL_VALUE
 					"editable": false
+					"background": new java.awt.Color( 255, 255, 255, 255 )
 				} )
 			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
 				"x": 0
 				"y": 50
-				"width": 370
+				"width": 369
 				"height": 440
 			} )
 			add( new FormComponent( "javax.swing.JButton" ) {
@@ -43,17 +46,26 @@ new FormModel {
 				"height": 40
 				"width": 80
 			} )
-			add( new FormComponent( "javax.swing.JLabel" ) {
-				name: "label1"
-				"text": "친구 목록"
-				"horizontalAlignment": 0
-				"font": new com.jformdesigner.model.SwingDerivedFont( null, 1, 15, true )
+			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.jformdesigner.runtime.NullLayout ) ) {
+				name: "panel1"
 				"background": new java.awt.Color( 255, 255, 255, 255 )
+				add( new FormComponent( "javax.swing.JLabel" ) {
+					name: "label1"
+					"text": "대화상대 선택 "
+					"horizontalAlignment": 0
+					"font": new com.jformdesigner.model.SwingDerivedFont( null, 1, 15, true )
+					"background": new java.awt.Color( 255, 255, 255, 255 )
+					"enabled": false
+					"foreground": new java.awt.Color( 0, 0, 0, 255 )
+				}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+					"x": 10
+					"y": 10
+					"width": 116
+					"height": 30
+				} )
 			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
-				"x": 139
-				"y": 10
-				"width": 90
-				"height": 30
+				"width": 370
+				"height": 560
 			} )
 		}, new FormLayoutConstraints( null ) {
 			"location": new java.awt.Point( 0, 0 )

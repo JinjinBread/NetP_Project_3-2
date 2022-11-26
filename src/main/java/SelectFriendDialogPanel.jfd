@@ -12,10 +12,9 @@ new FormModel {
 			name: "this"
 			"background": new java.awt.Color( 255, 255, 255, 255 )
 			add( new FormComponent( "javax.swing.JCheckBox" ) {
-				name: "isSelected"
+				name: "checkBox"
 				"font": new java.awt.Font( "맑은 고딕", 0, 14 )
 				"background": new java.awt.Color( 255, 255, 255, 255 )
-				"enabled": false
 			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
 				"x": 330
 				"y": 19

@@ -12,7 +12,7 @@ new FormModel {
 			name: "this"
 			"background": new java.awt.Color( 255, 255, 255, 255 )
 			add( new FormComponent( "javax.swing.JLabel" ) {
-				name: "name"
+				name: "lblName"
 				"font": new com.jformdesigner.model.SwingDerivedFont( null, 1, 14, true )
 			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
 				"width": 60
@@ -30,7 +30,7 @@ new FormModel {
 				"y": 40
 			} )
 			add( new FormComponent( "javax.swing.JLabel" ) {
-				name: "status"
+				name: "lblStatus"
 			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
 				"x": 265
 				"y": 30
@@ -38,8 +38,8 @@ new FormModel {
 				"height": 20
 			} )
 			add( new FormComponent( "javax.swing.JLabel" ) {
-				name: "profile"
-				"icon": new com.jformdesigner.model.SwingIcon( 0, "/default_profile.jpg" )
+				name: "lblProfile"
+				"icon": sfield com.jformdesigner.model.FormObject NULL_VALUE
 			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
 				"width": 50
 				"height": 50

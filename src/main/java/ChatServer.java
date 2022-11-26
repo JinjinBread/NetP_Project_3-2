@@ -180,7 +180,7 @@ public class ChatServer extends JFrame {
             }
 
             for (ChatRoomPanel room : RoomVec) {
-                if (room.UserList.contains(UserName)) { // 각 채팅방의 유저리스트에서 내가 있으면(즉, 내가 들어가있는 채팅방이면)
+                if (room.UserList.contains(UserName)) { // 모든 채팅방의 유저리스트를 훑어서 내가 있으면(즉, 내가 들어가있는 채팅방이면)
                     ChatObject obcm = new ChatObject(UserName, "510", "NEW ROOM");
                     obcm.room_id = room.Room_Id;
                     obcm.userlist = room.UserList;
@@ -193,7 +193,16 @@ public class ChatServer extends JFrame {
 
         public void Logout() {
             String msg = "[" + UserName + "]님이 퇴장 하였습니다.\n";
-            UserVec.removeElement(this); // Logout한 현재 객체를 벡터에서 지운다
+            SearchLoggedUser(UserName).UserStatus = "Q"; // quit(종료) 상태
+
+            for (LoggedUser user: LoggedUserVector) {
+                if (user.UserStatus.equals(("O"))) {
+                    ChatObject obcm = new ChatObject(UserName, "400", "Logout");
+                    obcm.img = user.Icon;
+                    obcm.statusMsg = user.UserStatusMsg;
+                    WriteOneObject(obcm);
+                }
+            }
             //UserList = UserList.replace(this.UserName, ""); // Logout한 현재 객체를 리스트에서 지운다.
             //WriteAll(msg); // 나를 제외한 다른 User들에게 전송
 //            WriteOthersObject(ob);
@@ -201,7 +210,7 @@ public class ChatServer extends JFrame {
         }
 
         // 모든 User들에게 Object를 방송. 채팅 message와 image object를 보낼 수 있다
-        public void WriteAllObject(Object ob) {
+        public void WriteAllObject(ChatObject ob) {
             for (int i = 0; i < user_vc.size(); i++) {
                 UserService user = (UserService) user_vc.elementAt(i);
                 if (user.UserStatus == "O")
@@ -209,7 +218,7 @@ public class ChatServer extends JFrame {
             }
         }
 
-        public void WriteOthersObject(Object ob) {
+        public void WriteOthersObject(ChatObject ob) {
             for (int i = 0; i < user_vc.size(); i++) {
                 UserService user = (UserService) user_vc.elementAt(i);
                 if (user != this && user.UserStatus == "O")
@@ -217,50 +226,7 @@ public class ChatServer extends JFrame {
             }
         }
 
-        // UserService Thread가 담당하는 Client 에게 1:1 전송
-        public void WriteOne(String msg) {
-            try {
-                ChatObject obcm = new ChatObject("SERVER", "200", msg);
-                oos.writeObject(obcm);
-            } catch (IOException e) {
-                AppendText("dos.writeObject() error");
-                try {
-                    ois.close();
-                    oos.close();
-                    client_socket.close();
-                    client_socket = null;
-                    ois = null;
-                    oos = null;
-                } catch (IOException e1) {
-                    // TODO Auto-generated catch block
-                    e1.printStackTrace();
-                }
-                Logout(); // 에러가난 현재 객체를 벡터에서 지운다
-            }
-        }
-
-        // 귓속말 전송
-        public void WritePrivate(String msg) {
-            try {
-                ChatObject obcm = new ChatObject("귓속말", "200", msg);
-                oos.writeObject(obcm);
-            } catch (IOException e) {
-                AppendText("dos.writeObject() error");
-                try {
-                    oos.close();
-                    client_socket.close();
-                    client_socket = null;
-                    ois = null;
-                    oos = null;
-                } catch (IOException e1) {
-                    // TODO Auto-generated catch block
-                    e1.printStackTrace();
-                }
-                Logout(); // 에러가난 현재 객체를 벡터에서 지운다
-            }
-        }
-
-        public void WriteOneObject(Object ob) {
+        public void WriteOneObject(ChatObject ob) {
             try {
                 oos.writeObject(ob);
             } catch (IOException e) {
@@ -282,6 +248,23 @@ public class ChatServer extends JFrame {
 
         public void ChangeProfile(ChatObject cm) {
 
+        }
+
+        public void AddChatRoom(ChatObject cm) {
+            ChatRoomPanel chatRoom = new ChatRoomPanel(cm.userlist, RoomID);
+            RoomVec.add(chatRoom);
+            String[] users = cm.userlist.split(" ");
+            for (LoggedUser user : LoggedUserVector) {
+                for (String selectedUser: users) { // 채팅방에 있는 유저
+                    if (user.UserName.equals(selectedUser)) {
+                        cm.room_id = RoomID;
+                        cm.img = user.Icon; // 유저 프로필 사진
+                        user.user_svc.WriteOneObject(cm); // 채팅방에 있는 user들에게만 Write
+                    }
+                }
+                // System.out.println("RoomVec에 " + RoomID + "번 chatRoom을 추가합니다.");
+            }
+            RoomID++; // RoomID의 초기값은 0으로 방이 생성될 때마다 1씩 증가한다.
         }
 
         public void run() {
@@ -322,16 +305,14 @@ public class ChatServer extends JFrame {
                         msg = String.format("[%s] %s", cm.UserName, cm.data);
                         AppendText(msg); // server 화면에 출력
                         //String[] args = msg.split(" "); // 단어들을 분리한다.
-
-                        UserStatus = "O";
-
                         String[] users = cm.userlist.split(" ");
-                        for(int i = 0; i < UserVec.size(); i++) { // 채팅방에 있는 모든 유저에게 채팅을 보냄
-                            UserService tempUser = (UserService) user_vc.elementAt(i);
-                            for (int j = 0; j < users.length; j++) {
-                                if (tempUser.UserName.equals(users[j])) { // UserVec에서 채팅방에 참가한 user들을 찾음
-                                    tempUser.WriteOneObject(cm);
-                                }
+                        for (String user : users) { // 채팅방에 참가한 유저
+                            LoggedUser tempUser = SearchLoggedUser(user); // LoggedUserVector에서 채팅방에 참가한 user들을 찾음
+                            if (tempUser == null)
+                                break;
+                            if (tempUser.UserStatus.equals("O")) { // 온라인인 유저한테만
+                                tempUser.user_svc.WriteOneObject(cm);
+                                System.out.println("메인뷰로 채팅메시지 오브젝트를 보냄!!");
                             }
                         }
 //                        if (args.length == 1) { // Enter key 만 들어온 경우 Wakeup 처리만 한다.
@@ -398,7 +379,7 @@ public class ChatServer extends JFrame {
 //                        break;
 //                    }
                     else if (cm.code.matches("510")) {
-
+                        AddChatRoom(cm);
                     } else { // 300, 500, ... 기타 object는 모두 방송한다.
                         WriteAllObject(cm);
                     }

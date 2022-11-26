@@ -20,9 +20,7 @@ import javax.swing.*;
 public class ChatClientMainView extends JFrame {
     @Serial
     private static final long serialVersionUID = 1L;
-    //private ChatClientChatRoom chatRoom = ChatClientChatRoom();
     private final ChatClientMainView mainview = this;
-    //    private String UserName;
     private Socket socket;
     private ObjectInputStream ois;
     private ObjectOutputStream oos;
@@ -35,13 +33,8 @@ public class ChatClientMainView extends JFrame {
     public String UserStatus;
     public String UserStatusMsg = "HSU 컴퓨터공학부";
     public ImageIcon UserIcon;
-
-    private Vector<String> addedUserList = new Vector();
     private ImageIcon icon1 = new ImageIcon("resources/default_profile.jpg");
-    //    private Vector<ChatRoomPanel> RoomPanelVec = new Vector<>(); // 현재 유저가 들어가있는 채팅방 패널을 관리(시간, 마지막 채팅 관리)
-    //private Vector<ChatClientChatRoomView> RoomVec = new Vector(); // 현재 유저가 들어가있는 채팅방을관리
-//    private ChatObject myObject = new ChatObject(); // 각 스레드의 객체
-//    private int room; // 방 id
+
     public ChatClientMainView(String name, String ip, String port) {
 //        this.name = name; this.ip = ip; this.port = port;
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -49,16 +42,6 @@ public class ChatClientMainView extends JFrame {
         homeBtn.setIcon(new ImageIcon("resources/clicked_home.png"));
         chatListBtn.setIcon(new ImageIcon("resources/clicked_chatList.png"));
         createRoomBtn.setIcon(new ImageIcon("resources/create_chatRoom.png"));
-//        try {
-//            homePane.getDocument().insertString(homePane.getDocument().getLength(), " ", null);
-//        } catch(BadLocationException ex1){
-//            // Ignore
-//        }
-//        try {
-//            homePane.setCaretPosition(homePane.getDocument().getLength()-1);
-//        } catch(Exception ex){
-//            homePane.setCaretPosition(0);
-//        }
 
         chatListHeader.setVisible(false);
         chatList.setVisible(false);
@@ -91,8 +74,7 @@ public class ChatClientMainView extends JFrame {
 
             ListenNetwork net = new ListenNetwork();
             net.start();
-        }
-        catch (NumberFormatException | IOException e) {
+        } catch (NumberFormatException | IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
             JOptionPane.showMessageDialog(null, "connect error", "ERROR MESSAGE", JOptionPane.ERROR_MESSAGE);
@@ -155,9 +137,9 @@ public class ChatClientMainView extends JFrame {
                 friend.setIcon(cm);
             }
         }
-        for (ChatRoomPanel chatRoom : RoomVector) {
-            //if ()
-        }
+//        for (ChatRoomPanel chatRoom : RoomVector) { // 프로필을 변경한 유저가 들어가있는 채팅방의 icon을 바꿈
+//            if (chatRoom.User)
+//        }
     }
 
     public void AddChatRoom(ChatObject cm) { // 채팅방 생성
@@ -202,8 +184,9 @@ public class ChatClientMainView extends JFrame {
                         case "120": // 상태 메시지 변경
                             break;
                         case "200": // chat message
+                            AppendText(cm);
 //                            RoomPanelVec.get(n).room_id와 cm.room_id가 일치하는 panel의 profile, time, lastChat을 변경함.
-                            SendObject(cm);
+                            //SendObject(cm);
                             break;
 //                            if (cm.UserName.equals(UserName))
 //                                room.AppendTextR(msg); // 내 메세지는 우측에
@@ -283,11 +266,41 @@ public class ChatClientMainView extends JFrame {
 //    }
 
     public void AppendText(ChatObject cm) {
+        ChatRoomPanel currentChatRoom = null;
+        for (ChatRoomPanel chatRoom: RoomVector) {
+            if (chatRoom.Room_Id == cm.room_id) { // RoomVector에서 채팅이 날라온 채팅방(Room_Id를 통해)을 찾음
+                currentChatRoom = chatRoom;
+                break;
+            }
+        }
 
+//        if (currentChatRoom == null) // 채팅바
+//            JOptionPane.showMessageDialog(null, "not exist ChatRoom", "ERROR MESSAGE", JOptionPane.ERROR_MESSAGE);
+
+        if (cm.UserName.equals(UserName)) // 내가 보낸 채팅이면
+            currentChatRoom.roomview.AppendTextR(cm.data);
+        else
+            currentChatRoom.roomview.AppendTextL(cm.data);
+//        System.out.println("메시지가 성공적으로 전달됨.");
     }
 
+    // 아직 구현 안함
     public void AppendImage(ChatObject cm) {
+        ChatRoomPanel currentChatRoom = null;
+        for (ChatRoomPanel chatRoom: RoomVector) {
+            if (chatRoom.Room_Id == cm.room_id) { // RoomVector에서 채팅이 날라온 채팅방(Room_Id를 통해)을 찾음
+                currentChatRoom = chatRoom;
+                break;
+            }
+        }
 
+//        if (currentChatRoom == null)
+//            JOptionPane.showMessageDialog(null, "not exist ChatRoom", "ERROR MESSAGE", JOptionPane.ERROR_MESSAGE);
+
+        if (cm.UserName.equals(UserName)) // 내가 보낸 채팅이면
+            currentChatRoom.roomview.AppendTextR(cm.data);
+        else
+            currentChatRoom.roomview.AppendTextL(cm.data);
     }
 
     public void SendObject(ChatObject ob) { // 서버로 메세지를 보내는 메소드
@@ -333,10 +346,10 @@ public class ChatClientMainView extends JFrame {
         chatListHeader.setVisible(false);
     }
 
-    private void createRoom(MouseEvent e) {
+    private void showDialog(MouseEvent e) {
         // TODO add your code here
         SelectFriendDialog dialog = new SelectFriendDialog(mainview); // 아직 보여지진 않음
-        String userlist = dialog.ShowDialog(); // 이때 보여짐
+        String userlist = dialog.ShowDialog(); // 이때 보여짐. 모달 dialog라 선택이 되어야 userlist가 넘어옴.
         dialog = null; // dialog 삭제
 
         if (userlist != null) { // 선택된 유저가 있다면,
@@ -480,7 +493,7 @@ public class ChatClientMainView extends JFrame {
             createRoomBtn.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    createRoom(e);
+                    showDialog(e);
                 }
                 @Override
                 public void mouseEntered(MouseEvent e) {

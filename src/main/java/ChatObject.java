@@ -24,30 +24,11 @@ public class ChatObject implements Serializable {
         this.UserName = UserName;
         this.data = msg;
     }
-
-    public ChatObject(String code, String userlist) {
-        this.code = code;
-        this.userlist = userlist;
-    }
-
-    public ChatObject(String code, int room_id, String userlist) {
-        this.code = code;
-        this.room_id = room_id;
-        this.userlist = userlist;
-    }
-
     public ChatObject(String UserName, String code, String msg, String user_list, int room_id) {
         this.code = code;
         this.UserName = UserName;
         this.data = msg;
         this.userlist = user_list;
         this.room_id = room_id;
-    }
-
-    public ChatObject(String UserName, String code, String msg, ImageIcon img) {
-        this.code = code;
-        this.UserName = UserName;
-        this.data = msg;
-        this.img = img;
     }
 }

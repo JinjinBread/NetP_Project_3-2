@@ -3,10 +3,14 @@ JFDML JFormDesigner: "8.0.0.0.194" Java: "17.0.3" encoding: "UTF-8"
 new FormModel {
 	contentType: "form/swing"
 	root: new FormRoot {
-		add( new FormWindow( "javax.swing.JFrame", new FormLayoutManager( class com.jformdesigner.runtime.NullLayout ) ) {
+		add( new FormWindow( "javax.swing.JFrame", new FormLayoutManager( class com.jformdesigner.runtime.NullLayout ) {
+			"autoSize": false
+		} ) {
 			name: "this"
 			"resizable": false
-			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.jformdesigner.runtime.NullLayout ) ) {
+			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.jformdesigner.runtime.NullLayout ) {
+				"autoSize": false
+			} ) {
 				name: "panel1"
 				add( new FormComponent( "javax.swing.JLabel" ) {
 					name: "logo"
@@ -46,12 +50,12 @@ new FormModel {
 				} )
 				add( new FormComponent( "javax.swing.JButton" ) {
 					name: "connect"
-					"text": "Connect"
+					"text": "로그인"
 				}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
-					"x": 140
-					"y": 490
-					"width": 100
-					"height": 30
+					"x": 70
+					"y": 480
+					"width": 245
+					"height": 35
 				} )
 				add( new FormComponent( "javax.swing.JLabel" ) {
 					name: "userName"

@@ -28,8 +28,8 @@ public class ChatClientChatRoomView extends JFrame {
     private String UserName;
     private FileDialog fd;
     private ChatClientMainView mainview;
-    public int room_id; // 이 ChatRoom의 room_id
-    public String user_list;
+    public int Room_Id; // 이 ChatRoom의 room_id
+    public String UserList;
     private SimpleDateFormat dateFormat = new SimpleDateFormat(" aa kk:mm");
 
 //    public ChatClientChatRoom(String user_name, String user_list, int room_id) {
@@ -47,9 +47,9 @@ public class ChatClientChatRoomView extends JFrame {
         emoticonBtn.setIcon(new ImageIcon("resources/emoticon.png"));
 
         this.mainview = mainview;
-        this.room_id = room_id;
+        this.Room_Id = room_id;
         this.UserName = userName;
-        this.user_list = user_list;
+        this.UserList = user_list;
 
         menu.setContentAreaFilled(false); emoticonBtn.setContentAreaFilled(false); fileBtn.setContentAreaFilled(false);
         menu.setFocusPainted(false); emoticonBtn.setFocusPainted(false); fileBtn.setFocusPainted(false);
@@ -179,7 +179,9 @@ public class ChatClientChatRoomView extends JFrame {
                 String msg = null;
                 // msg = String.format("[%s] %s\n", UserName, txtInput.getText());
                 msg = txtInput.getText();
-                ChatObject obcm = new ChatObject(UserName, "200", msg, user_list, room_id);
+                ChatObject obcm = new ChatObject(UserName, "200", msg);
+                obcm.userlist = UserList;
+                obcm.room_id = Room_Id;
                 mainview.SendObject(obcm);
                 txtInput.setText(""); // 메세지를 보내고 나면 메세지 쓰는창을 비운다.
                 txtInput.requestFocus(); // 메세지를 보내고 커서를 다시 텍스트 필드로 위치시킨다
@@ -197,7 +199,9 @@ public class ChatClientChatRoomView extends JFrame {
                 String msg = null;
                 // msg = String.format("[%s] %s\n", UserName, txtInput.getText());
                 msg = txtInput.getText();
-                ChatObject obcm = new ChatObject(UserName, "200", msg, user_list, room_id);
+                ChatObject obcm = new ChatObject(UserName, "200", msg);
+                obcm.userlist = UserList;
+                obcm.room_id = Room_Id;
                 mainview.SendObject(obcm);
                 txtInput.setText(""); // 메세지를 보내고 나면 메세지 쓰는창을 비운다.
                 txtInput.requestFocus(); // 메세지를 보내고 커서를 다시 텍스트 필드로 위치시킨다
@@ -227,7 +231,7 @@ public class ChatClientChatRoomView extends JFrame {
     }
 
     // 프로필
-    ImageIcon icon1 = new ImageIcon("src/main/resources/icon1.jpg");
+    ImageIcon icon1 = new ImageIcon("resources/icon1.jpg");
 
     public void AppendIcon(ImageIcon icon) {
 //        int len = textArea.getDocument().getLength();
@@ -289,14 +293,16 @@ public class ChatClientChatRoomView extends JFrame {
         StyleConstants.setForeground(right, Color.BLACK);
         doc.setParagraphAttributes(doc.getLength(), 1, right, false);
         Date cur = new Date();
+        String time = dateFormat.format(cur);
         try {
-            doc.insertString(doc.getLength(), dateFormat.format(cur) + msg+"\n", right );
+            doc.insertString(doc.getLength(), time + msg + "\n", right);
         } catch (BadLocationException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
         int len = textArea.getDocument().getLength();
         textArea.setCaretPosition(len);
+
         //textArea.replaceSelection("\n");
 
     }
@@ -319,6 +325,30 @@ public class ChatClientChatRoomView extends JFrame {
         //textArea.replaceSelection("\n");
 
     }
+
+//    public void AppendImageL(ImageIcon ori_icon) {
+//        //textArea.append(msg + "\n");
+//        //AppendIcon(icon1);
+//
+//        StyledDocument doc = textArea.getStyledDocument();
+//        SimpleAttributeSet left = new SimpleAttributeSet();
+//        StyleConstants.setAlignment(left, StyleConstants.ALIGN_LEFT);
+//        StyleConstants.setForeground(left, Color.BLACK);
+//        doc.setParagraphAttributes(doc.getLength(), 1, left, false);
+//        Date cur = new Date();
+//        try {
+//            // JLabel ~ = new JLable;
+//            doc.insertString(doc.getLength(),msg + dateFormat.format(cur) + "\n", left);
+//            // string format이 힘드므로 채팅메시지를 받아다가 label로 만들어서 집어 넣는다.
+//            // insertComponent(JLabel);
+//        } catch (BadLocationException e) {
+//            // TODO Auto-generated catch block
+//            e.printStackTrace();
+//        }
+//        int len = textArea.getDocument().getLength();
+//        textArea.setCaretPosition(len); // 맨 아래로 스크롤함
+//        //textArea.replaceSelection("\n");
+//    }
 
     public void AppendImage(ImageIcon ori_icon) {
         int len = textArea.getDocument().getLength();
@@ -485,7 +515,7 @@ public class ChatClientChatRoomView extends JFrame {
             scrollPane2.setBounds(11, 5, 360, 90);
 
             //---- fileBtn ----
-            fileBtn.setIcon(new ImageIcon(getClass().getResource("/file.png")));
+            fileBtn.setIcon(null);
             fileBtn.setBorder(null);
             fileBtn.addMouseListener(new MouseAdapter() {
                 @Override
@@ -501,7 +531,7 @@ public class ChatClientChatRoomView extends JFrame {
             fileBtn.setBounds(40, 103, 30, 30);
 
             //---- emoticonBtn ----
-            emoticonBtn.setIcon(new ImageIcon(getClass().getResource("/emoticon.png")));
+            emoticonBtn.setIcon(null);
             emoticonBtn.setBorder(null);
             emoticonBtn.addMouseListener(new MouseAdapter() {
                 @Override

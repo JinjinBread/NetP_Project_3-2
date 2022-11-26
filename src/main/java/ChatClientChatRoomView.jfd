@@ -81,7 +81,7 @@ new FormModel {
 				} )
 				add( new FormComponent( "javax.swing.JButton" ) {
 					name: "fileBtn"
-					"icon": new com.jformdesigner.model.SwingIcon( 0, "/file.png" )
+					"icon": sfield com.jformdesigner.model.FormObject NULL_VALUE
 					"border": sfield com.jformdesigner.model.FormObject NULL_VALUE
 					addEvent( new FormEvent( "java.awt.event.MouseListener", "mouseEntered", "mouseEntered", true ) )
 					addEvent( new FormEvent( "java.awt.event.MouseListener", "mouseExited", "mouseExited", true ) )
@@ -93,7 +93,7 @@ new FormModel {
 				} )
 				add( new FormComponent( "javax.swing.JButton" ) {
 					name: "emoticonBtn"
-					"icon": new com.jformdesigner.model.SwingIcon( 0, "/emoticon.png" )
+					"icon": sfield com.jformdesigner.model.FormObject NULL_VALUE
 					"border": sfield com.jformdesigner.model.FormObject NULL_VALUE
 					addEvent( new FormEvent( "java.awt.event.MouseListener", "mouseEntered", "mouseEntered", true ) )
 					addEvent( new FormEvent( "java.awt.event.MouseListener", "mouseExited", "mouseExited", true ) )

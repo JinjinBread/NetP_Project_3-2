@@ -15,26 +15,22 @@ public class SelectFriendDialogPanel extends JPanel {
     public ImageIcon icon;
     public String UserName;
     public SelectFriendDialogPanel(ImageIcon icon, String name) {
+        initComponents();
         this.icon = icon;
         UserName = name;
         Image img = icon.getImage().getScaledInstance(lblUserIcon.getWidth(), lblUserIcon.getHeight(), Image.SCALE_SMOOTH);
         this.lblUserIcon.setIcon(new ImageIcon(img));
         this.lblUserName.setText(name);
-        initComponents();
-
-    }
-
-    public void setSelectable(boolean tf) {
-        isSelected.setEnabled(tf);
+        setVisible(true);
     }
 
     public String getName() {
-        return this.isSelected.getText();
+        return this.checkBox.getText();
     }
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents  @formatter:off
-        isSelected = new JCheckBox();
+        checkBox = new JCheckBox();
         lblUserName = new JLabel();
         lblUserIcon = new JLabel();
 
@@ -42,12 +38,11 @@ public class SelectFriendDialogPanel extends JPanel {
         setBackground(Color.white);
         setLayout(null);
 
-        //---- isSelected ----
-        isSelected.setFont(new Font("\ub9d1\uc740 \uace0\ub515", Font.PLAIN, 14));
-        isSelected.setBackground(Color.white);
-        isSelected.setEnabled(false);
-        add(isSelected);
-        isSelected.setBounds(330, 19, 21, 30);
+        //---- checkBox ----
+        checkBox.setFont(new Font("\ub9d1\uc740 \uace0\ub515", Font.PLAIN, 14));
+        checkBox.setBackground(Color.white);
+        add(checkBox);
+        checkBox.setBounds(330, 19, 21, 30);
         add(lblUserName);
         lblUserName.setBounds(70, 19, 190, 30);
         add(lblUserIcon);
@@ -58,7 +53,7 @@ public class SelectFriendDialogPanel extends JPanel {
     }
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables  @formatter:off
-    public JCheckBox isSelected;
+    public JCheckBox checkBox;
     public JLabel lblUserName;
     public JLabel lblUserIcon;
     // JFormDesigner - End of variables declaration  //GEN-END:variables  @formatter:on

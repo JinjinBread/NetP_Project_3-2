@@ -3,6 +3,7 @@ import java.awt.event.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Vector;
 import javax.swing.*;
 /*
  * Created by JFormDesigner on Thu Nov 17 14:08:39 KST 2022
@@ -26,22 +27,50 @@ public class ChatRoomPanel extends JPanel {
     public Boolean online = false;
     public Image tmpImg = null;
     public Graphics2D tmpGc;
-    public ChatObject[] ChatMsgList; // 채팅방 내용 저장
+    public Vector<ChatObject> ChatMsgList = new Vector<>(); // 채팅한 내용 저장.
     private boolean clicked = false; // 클릭되어 있으면 background 색을 회색으로
 
     public ChatRoomPanel(ChatClientMainView mainview, ImageIcon icon, String name, String userlist, int room_id) {
+        initComponents();
+
         this.mainview = mainview;
         RoomIcon = icon;
         UserName = name;
         Room_Id = room_id;
         UserList = userlist;
-        String[] users = userlist.split(" ");
+        createChatRoomView(); // roomview 생성
+
+        String[] users = UserList.split(" ");
         String temp = users[0];
         for (int i = 1; i < users.length; i++) {
             temp += String.format(", %s", users[i]);
         }
+
+//        카카오톡처럼 채팅방 이름에 자신의 이름은 뺌
+//        String userListWithoutMe = UserList.replace(UserName, " ");
+//        String[] users = userListWithoutMe.split(" ");
+//        String temp = "";
+//        Boolean firstFind = false;
+
+//        if (users.length == 1) { // 나와의 채팅
+//            temp = UserName;
+//        } else if (users.length == 2) { // 2인 채팅
+//            temp = users[0] + users[1];
+//        } else {
+//            for (String user : users) {
+//                if (!user.equals("") && !firstFind) { // 처음은 콤마를 안 찍기 위함.
+//                    temp = user;
+//                    firstFind = true;
+//                } else
+//                    temp += String.format(", %s", user);
+//            }
+//        }
         this.lblChatRoomName.setText(temp);
-        initComponents();
+    }
+
+    public ChatRoomPanel(String userlist, int room_id) { // 서버에서 사용할 생성자
+        this.UserList = userlist;
+        this.Room_Id = room_id;
     }
 
 //    public ChatClientChatRoom getChatRoom(int room_id) {}
@@ -69,14 +98,14 @@ public class ChatRoomPanel extends JPanel {
             ArrayList<ImageIcon> icons = new ArrayList<>();
             int i = 0;
             for (int j = 0; j < users.length && i < 4; j++) { // 최대 4명의 유저 프로필 사진만 보여주므로 i < 4
-                if (users[i].equals(UserName)) // 자신의 프로필은 제외
+                if (users[j].equals(UserName)) // 자신의 프로필은 제외
                     continue;
-                icons.add(mainview.GetUserIcon(users[i]));
+                icons.add(mainview.GetUserIcon(users[j]));
                 i++;
             }
             if (i == 1) { // 2인 채팅방일 경우
                 RoomIcon = icons.get(0); // 상대방 아이콘으로 RoomIcon 등록
-                img = RoomIcon.getImage().getScaledInstance(lblRoomIcon.getWidth()/2, lblRoomIcon.getHeight()/2, Image.SCALE_SMOOTH);
+                img = RoomIcon.getImage().getScaledInstance(lblRoomIcon.getWidth(), lblRoomIcon.getHeight(), Image.SCALE_SMOOTH);
             } else {
                 tmpGc.setColor(Color.WHITE);
                 tmpGc.fillRect(0, 0, lblRoomIcon.getWidth(), lblRoomIcon.getHeight());
@@ -127,7 +156,7 @@ public class ChatRoomPanel extends JPanel {
     public void ChangeFriendProfile(ChatObject cm) {
         mainview.ChangeFriendProfile(cm);
         setChatRoomIcon(); // roomIcon을 update해줌
-        // setSelectFriendIcon(); // SelectFriendDialog icon를 update해줌 
+        // setSelectFriendIcon(); // SelectFriendDialog icon를 update해줌
     }
 
     public void setLastMsg(ChatObject cm) {
