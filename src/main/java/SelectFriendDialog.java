@@ -2,6 +2,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.Vector;
 import javax.swing.*;
+import javax.swing.border.*;
 /*
  * Created by JFormDesigner on Sun Nov 20 23:11:45 KST 2022
  */
@@ -21,10 +22,10 @@ public class SelectFriendDialog extends JDialog {
     public SelectFriendDialog(ChatClientMainView mainview) {
         // 모달로 설정 즉, 특정 선택을 해야 화면이 사라진다.
         initComponents();
+        setLocationRelativeTo(mainview);
         this.mainview = mainview;
         for (int i = 0; i < mainview.FriendVector.size(); i++) {
             FriendPanel friend1 = mainview.FriendVector.get(i);
-            // 온라인 상태면 체크박스 활성화 checked(체크박스name).setEnabled(true);
             if (mainview.UserName.equals(friend1.UserName)) // 자기 자신은 친구 선택 다이얼로그에 띄우지 않음. (+ SelectVector에 넣지 않음)
                 continue;
             if (friend1.UserStatus.equals("O")) {
@@ -79,10 +80,10 @@ public class SelectFriendDialog extends JDialog {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents  @formatter:off
         scrollPane1 = new JScrollPane();
         listPane = new JTextPane();
-        ok = new JButton();
         cancel = new JButton();
         panel1 = new JPanel();
         label1 = new JLabel();
+        ok = new JButton();
 
         //======== this ========
         setBackground(Color.white);
@@ -105,19 +106,10 @@ public class SelectFriendDialog extends JDialog {
         contentPane.add(scrollPane1);
         scrollPane1.setBounds(0, 50, 369, 440);
 
-        //---- ok ----
-        ok.setText("\ud655\uc778");
-        ok.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                okMouseClicked(e);
-            }
-        });
-        contentPane.add(ok);
-        ok.setBounds(190, 505, 80, 40);
-
         //---- cancel ----
         cancel.setText("\ucde8\uc18c");
+        cancel.setBackground(Color.white);
+        cancel.setBorder(new MatteBorder(1, 1, 1, 1, new Color(0xe6e6e6)));
         cancel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -125,7 +117,7 @@ public class SelectFriendDialog extends JDialog {
             }
         });
         contentPane.add(cancel);
-        cancel.setBounds(275, 505, 80, 40);
+        cancel.setBounds(260, 505, 80, 40);
 
         //======== panel1 ========
         {
@@ -141,6 +133,19 @@ public class SelectFriendDialog extends JDialog {
             label1.setForeground(Color.black);
             panel1.add(label1);
             label1.setBounds(10, 10, 116, 30);
+
+            //---- ok ----
+            ok.setText("\ud655\uc778");
+            ok.setBackground(Color.white);
+            ok.setBorder(new MatteBorder(1, 1, 1, 1, new Color(0xe6e6e6)));
+            ok.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    okMouseClicked(e);
+                }
+            });
+            panel1.add(ok);
+            ok.setBounds(165, 505, 80, 40);
 
             {
                 // compute preferred size
@@ -160,8 +165,8 @@ public class SelectFriendDialog extends JDialog {
         contentPane.add(panel1);
         panel1.setBounds(0, 0, 370, 560);
 
-        contentPane.setPreferredSize(new Dimension(370, 590));
-        pack();
+        contentPane.setPreferredSize(new Dimension(370, 595));
+        setSize(370, 595);
         setLocationRelativeTo(getOwner());
         // JFormDesigner - End of component initialization  //GEN-END:initComponents  @formatter:on
     }
@@ -169,9 +174,9 @@ public class SelectFriendDialog extends JDialog {
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables  @formatter:off
     private JScrollPane scrollPane1;
     private JTextPane listPane;
-    private JButton ok;
     private JButton cancel;
     private JPanel panel1;
     private JLabel label1;
+    private JButton ok;
     // JFormDesigner - End of variables declaration  //GEN-END:variables  @formatter:on
 }

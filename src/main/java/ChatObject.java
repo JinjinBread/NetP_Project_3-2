@@ -10,7 +10,9 @@ public class ChatObject implements Serializable {
     public String code; // 100:로그인, 400:로그아웃, 200:채팅메시지, 300:Image, 500: Mouse Event
     public String UserName;
     public String data;
-    public ImageIcon img;
+    public ImageIcon img; // 프로필 이미지
+    public ImageIcon imgData; // 보내는 이미지
+    public ImageIcon ori_imgData; // 보내는 이미지의 원래 크기 (ImageViewer에 사용)
     public String status;
     public String statusMsg;
     public int room_id;

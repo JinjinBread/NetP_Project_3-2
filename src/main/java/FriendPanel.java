@@ -1,4 +1,6 @@
 import java.awt.*;
+import java.awt.event.*;
+import java.awt.image.BufferedImage;
 import javax.swing.*;
 /*
  * Created by JFormDesigner on Tue Nov 15 16:14:16 KST 2022
@@ -18,28 +20,89 @@ public class FriendPanel extends JPanel {
     public ImageIcon UserIcon; // 프로필 사진
     public boolean online = false; // 유저가 온라인인지 오프라인인지
 
-    private ImageIcon onlineImg = new ImageIcon("resources/online.png");
-    private ImageIcon offlineImg = new ImageIcon("resources/offline.png");
+    public ImageIcon onlineImg = new ImageIcon("resources/online.png");
+    public ImageIcon offlineImg = new ImageIcon("resources/offline.png");
 
     public FriendPanel(ChatClientMainView mainview, ImageIcon icon, String name, String userStatus, String statusMsg) {
         initComponents();
-
         this.UserName = name;
         this.UserStatus = userStatus;
         this.UserStatusMsg = statusMsg;
         this.UserIcon = icon;
         this.mainview = mainview;
-        this.online = true;
 
-        setOnline(true);
+        if (UserStatus.equals("O"))
+            online = true;
+        else
+            online = false;
+        setOnline(online);
         resizeIcon();
 
         setVisible(true);
-        //this.profile.setIcon(cm.img);
         this.lblName.setText(UserName);
         lblStatusMsg.setText(UserStatusMsg);
-        //this.status.setText(cm.status);
     }
+
+    // 원형 프로필
+//    class MyLblProfile extends JLabel {
+//
+//        public MyLblProfile() {
+//            init();
+//        }
+//
+//        @Override
+//        protected void paintComponent(Graphics g) {
+//            super.paintComponent(g);
+//
+//            resizedIcon();
+//
+//            int diameter = Math.min(lblProfile.getWidth(), lblProfile.getHeight());
+//            BufferedImage mask = new BufferedImage(UserIcon.getIconWidth(), UserIcon.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
+//
+//            Graphics2D g2 = mask.createGraphics();
+//            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+//            g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+//            g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+//            g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+//            g2.fillOval(0, 0, diameter, diameter);
+//            g2.dispose();
+//
+//            BufferedImage masked = new BufferedImage(diameter, diameter, BufferedImage.TYPE_INT_ARGB);
+//            g2 = masked.createGraphics();
+//            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+//            g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+//            g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+//            g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+//            int x = (diameter - UserIcon.getIconWidth()) / 2;
+//            int y = (diameter - UserIcon.getIconHeight()) / 2;
+//            g2.drawImage(UserIcon.getImage(), x, y, null);
+//            g2.setComposite(AlphaComposite.getInstance(AlphaComposite.DST_IN));
+//            g2.drawImage(mask, 0, 0, null);
+//            g2.dispose();
+//
+//            UserIcon = new ImageIcon(masked);
+//            this.setIcon(UserIcon);
+//        }
+//
+//        private void lblProfileMouseClicked(MouseEvent e) { // 프로필 클릭 시
+//            // TODO add your code here
+//            if (UserName.equals(mainview.UserName)) { // 자기 자신의 프로필만 변경할 수 있음.
+//                mainview.UserIcon = UserIcon;
+//                MyProfile myProfile = new MyProfile(mainview);
+//                myProfile.setVisible(true);
+//            }
+//        }
+//
+//        private void init() {
+//            setIcon(null);
+//            addMouseListener(new MouseAdapter() {
+//                @Override
+//                public void mouseClicked(MouseEvent e) {
+//                    lblProfileMouseClicked(e);
+//                }
+//            });
+//        }
+//    }
 
     private void resizeIcon() {
         Image img = UserIcon.getImage();
@@ -48,32 +111,38 @@ public class FriendPanel extends JPanel {
         this.lblProfile.setIcon(resizedIcon);
     }
 
-//    public void setOnOffImg() {
-//        if (online)
-//            lblStatus.setIcon(onlineImg);
-//        else
-//            lblStatus.setIcon(offlineImg);
-//    }
-
     public void setOnline(boolean tf) {
         online = tf;
-        if (online) // 온라인 이미지로 변경
-            lblStatus.setIcon(onlineImg);
-        else // 오프라인 이미지로 변경
-            lblStatus.setIcon(offlineImg);
+        Image resizedImg;
+        if (online) { // 온라인 이미지로 변경
+            resizedImg = onlineImg.getImage().getScaledInstance(lblStatus.getWidth(), lblStatus.getHeight(), Image.SCALE_SMOOTH);
+            lblStatus.setIcon(new ImageIcon(resizedImg));
+        }
+        else { // 오프라인 이미지로 변경
+            resizedImg = offlineImg.getImage().getScaledInstance(lblStatus.getWidth(), lblStatus.getHeight(), Image.SCALE_SMOOTH);
+            lblStatus.setIcon(new ImageIcon(resizedImg));
+        }
         repaint();
     }
 
-    public void setIcon(ChatObject cm) {
-        UserIcon = cm.img;
-    }
-
-    public void setStatus(String status) {
-        lblStatusMsg.setText(status);
+    public void setUserIcon(ImageIcon img) {
+        Image resizedImg;
+        resizedImg = img.getImage().getScaledInstance(lblProfile.getWidth(), lblProfile.getHeight(), Image.SCALE_SMOOTH);
+        lblProfile.setIcon(new ImageIcon(resizedImg));
     }
 
     public void setUserStatusMsg(String userStatusMsg) {
         UserStatusMsg = userStatusMsg;
+        lblStatusMsg.setText(userStatusMsg);
+    }
+
+    private void lblProfileMouseClicked(MouseEvent e) {
+        // TODO add your code here
+        if (UserName.equals(mainview.UserName)) { // 자기 자신의 프로필만 변경할 수 있음.
+            mainview.UserIcon = UserIcon;
+            MyProfile myProfile = new MyProfile(mainview);
+            myProfile.setVisible(true);
+        }
     }
 
     private void initComponents() {
@@ -100,7 +169,12 @@ public class FriendPanel extends JPanel {
         lblStatus.setBounds(265, 30, 20, 20);
 
         //---- lblProfile ----
-        lblProfile.setIcon(null);
+        lblProfile.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                lblProfileMouseClicked(e);
+            }
+        });
         add(lblProfile);
         lblProfile.setBounds(25, 15, 50, 50);
 

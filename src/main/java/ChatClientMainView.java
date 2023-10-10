@@ -6,6 +6,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serial;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Vector;
 import javax.swing.*;
 /*
@@ -32,8 +33,7 @@ public class ChatClientMainView extends JFrame {
     public String UserName;
     public String UserStatus;
     public String UserStatusMsg = "HSU 컴퓨터공학부";
-    public ImageIcon UserIcon;
-    private ImageIcon icon1 = new ImageIcon("resources/default_profile.jpg");
+    public ImageIcon UserIcon = new ImageIcon("resources/default_profile.jpg"); // 기본 프로필
 
     public ChatClientMainView(String name, String ip, String port) {
 //        this.name = name; this.ip = ip; this.port = port;
@@ -63,8 +63,7 @@ public class ChatClientMainView extends JFrame {
             oos.flush();
             ois = new ObjectInputStream(socket.getInputStream());
 
-            AddFriend(icon1, UserName, "O", UserStatusMsg);
-            UserIcon = icon1;
+            AddFriend(UserIcon, UserName, "O", UserStatusMsg);
 
             ChatObject obcm = new ChatObject(UserName, "100", "Login");
             obcm.status = "O";
@@ -91,7 +90,7 @@ public class ChatClientMainView extends JFrame {
         friend.UserStatusMsg = statusMsg;
         homePane.insertComponent(friend);
         FriendVector.add(friend);
-        //homePane.setCaretPosition(0);
+        homePane.setCaretPosition(0);
         repaint();
     }
 
@@ -115,37 +114,62 @@ public class ChatClientMainView extends JFrame {
     public void LoginNewFriend(ChatObject cm) { // 로그인
         for (FriendPanel friend : FriendVector) {
             if (friend.UserName.equals(cm.UserName)) { // ex) user1이 로그아웃한 후 다시 user1으로 로그인하면 offline 상태를 online으로 변경
+                friend.UserStatus = "O";
                 friend.setOnline(cm.status.equals("O")); // 의문: LoginNewFriend는 status가 O인 상태로만 오지 않나? 그냥 friend.setOnline(true)하면 안됨?
                 return;
             }
         }
-        AddFriend(cm.img, cm.UserName, cm.status, cm.statusMsg); // 완전히 새로운 유저
+        AddFriend(cm.img, cm.UserName, cm.status, cm.statusMsg); // 완전히 새로운 유저 or (내가 로그인 하기 전에) 있었던 유저
     }
 
     public void LogoutFriend(ChatObject cm) { // 로그아웃
         for (FriendPanel friend : FriendVector) {
             if (friend.UserName.equals(cm.UserName)) { // 친구 벡터에서 로그아웃 한 유저를 찾음
+                //friend.lblStatus.setIcon()
+                friend.UserStatus = "Q";
                 friend.setOnline(false);
             }
         }
     }
 
     public void ChangeFriendProfile(ChatObject cm) { // 프로필 변경
-        UserIcon = cm.img;
+        if (UserName.equals(cm.UserName))
+            UserIcon = cm.img;
         for (FriendPanel friend : FriendVector) {
             if (friend.UserName.equals(cm.UserName)) {
-                friend.setIcon(cm);
+
+                friend.UserIcon = cm.img;
+                friend.setUserIcon(cm.img);
+                repaint();
+                break;
             }
         }
-//        for (ChatRoomPanel chatRoom : RoomVector) { // 프로필을 변경한 유저가 들어가있는 채팅방의 icon을 바꿈
-//            if (chatRoom.User)
-//        }
+        for (ChatRoomPanel chatRoom : RoomVector) { // 프로필을 변경한 유저가 들어가있는 채팅방의 icon을 바꿈
+            if (chatRoom.UserList.contains(cm.UserName)) {
+                chatRoom.ChangeFriendProfile(cm);
+            }
+        }
+        repaint();
+    }
+
+    public void ChangeStatusMsg(ChatObject cm) { // 상태메시지 변경
+        if (UserName.equals(cm.UserName))
+            UserStatusMsg = cm.statusMsg;
+        for (FriendPanel friend : FriendVector) {
+            if (friend.UserName.equals(cm.UserName)) {
+                friend.UserStatusMsg = cm.statusMsg;
+                friend.setUserStatusMsg(cm.statusMsg);
+                repaint();
+                break;
+            }
+        }
     }
 
     public void AddChatRoom(ChatObject cm) { // 채팅방 생성
 //        int len = chatPane.getDocument().getLength();
 //        chatPane.setCaretPosition(len);
-        ChatRoomPanel chatRoom = new ChatRoomPanel(mainview, cm.img, cm.UserName, cm.userlist, cm.room_id);
+        // cm.UserIcon과 cm.UserName은 방을 생성한 유저의 것이므로, 자신의 것(UserIcon, UserName)으로 바꿔서 보냄
+        ChatRoomPanel chatRoom = new ChatRoomPanel(mainview, UserIcon, UserName, cm.userlist, cm.room_id);
         chatPane.insertComponent(chatRoom);
         RoomVector.add(chatRoom);
 //        chatPane.setCaretPosition(0);
@@ -180,8 +204,10 @@ public class ChatClientMainView extends JFrame {
                             LoginNewFriend(cm);
                             break;
                         case "110": // 프로필 사진 변경
+                             ChangeFriendProfile(cm);
                             break;
                         case "120": // 상태 메시지 변경
+                             ChangeStatusMsg(cm);
                             break;
                         case "200": // chat message
                             AppendText(cm);
@@ -196,6 +222,8 @@ public class ChatClientMainView extends JFrame {
 //                                AppendTextL(msg);
 //                            break;
                         case "300": // Image 첨부
+                            AppendImage(cm);
+                            break;
 //                            if (cm.UserName.equals(UserName))
 //                                AppendTextR("[" + cm.UserName + "]");
 //                            else if (cm.UserName.equals("SERVER"))
@@ -227,7 +255,7 @@ public class ChatClientMainView extends JFrame {
 //                            break;
                     }
                 } catch (IOException e) {
-                    JOptionPane.showMessageDialog(null, "ois.readObject() error", "ERROR MESSAGE", JOptionPane.ERROR_MESSAGE);
+                    //JOptionPane.showMessageDialog(null, "ois.readObject() error", "ERROR MESSAGE", JOptionPane.ERROR_MESSAGE);
                     try {
                         ois.close();
                         oos.close();
@@ -242,65 +270,33 @@ public class ChatClientMainView extends JFrame {
         }
     }
 
-    // Server에게 network으로 전송
-//    public void SendMessage(String msg, int room_id) {
-//        try {
-//            // dos.writeUTF(msg);
-////			byte[] bb;
-////			bb = MakePacket(msg);
-////			dos.write(bb, 0, bb.length);
-//            ChatObject obcm = new ChatObject(UserName, "200", msg, room_id);
-//            oos.writeObject(obcm);
-//        } catch (IOException e) {
-//            JOptionPane.showMessageDialog(null, "oos.writeObject() error", "ERROR MESSAGE", JOptionPane.ERROR_MESSAGE);
-//            try {
-//                ois.close();
-//                oos.close();
-//                socket.close();
-//            } catch (IOException e1) {
-//                // TODO Auto-generated catch block
-//                e1.printStackTrace();
-//                System.exit(0);
-//            }
-//        }
-//    }
-
     public void AppendText(ChatObject cm) {
-        ChatRoomPanel currentChatRoom = null;
+        cm.date = new Date();
         for (ChatRoomPanel chatRoom: RoomVector) {
             if (chatRoom.Room_Id == cm.room_id) { // RoomVector에서 채팅이 날라온 채팅방(Room_Id를 통해)을 찾음
-                currentChatRoom = chatRoom;
+                chatRoom.setLastMsg(cm);
+                if (cm.UserName.equals(UserName)) // 내가 보낸 채팅이면
+                    chatRoom.roomview.AppendTextR(cm);
+                else
+                    chatRoom.roomview.AppendTextL(cm);
                 break;
             }
         }
-
-//        if (currentChatRoom == null) // 채팅바
-//            JOptionPane.showMessageDialog(null, "not exist ChatRoom", "ERROR MESSAGE", JOptionPane.ERROR_MESSAGE);
-
-        if (cm.UserName.equals(UserName)) // 내가 보낸 채팅이면
-            currentChatRoom.roomview.AppendTextR(cm.data);
-        else
-            currentChatRoom.roomview.AppendTextL(cm.data);
-//        System.out.println("메시지가 성공적으로 전달됨.");
     }
 
     // 아직 구현 안함
     public void AppendImage(ChatObject cm) {
-        ChatRoomPanel currentChatRoom = null;
+        cm.date = new Date();
         for (ChatRoomPanel chatRoom: RoomVector) {
             if (chatRoom.Room_Id == cm.room_id) { // RoomVector에서 채팅이 날라온 채팅방(Room_Id를 통해)을 찾음
-                currentChatRoom = chatRoom;
+                chatRoom.setLastMsg(cm);
+                if (cm.UserName.equals(UserName)) // 내가 보낸 채팅이면
+                    chatRoom.roomview.AppendImageR(cm);
+                else
+                    chatRoom.roomview.AppendImageL(cm);
                 break;
             }
         }
-
-//        if (currentChatRoom == null)
-//            JOptionPane.showMessageDialog(null, "not exist ChatRoom", "ERROR MESSAGE", JOptionPane.ERROR_MESSAGE);
-
-        if (cm.UserName.equals(UserName)) // 내가 보낸 채팅이면
-            currentChatRoom.roomview.AppendTextR(cm.data);
-        else
-            currentChatRoom.roomview.AppendTextL(cm.data);
     }
 
     public void SendObject(ChatObject ob) { // 서버로 메세지를 보내는 메소드
@@ -322,7 +318,7 @@ public class ChatClientMainView extends JFrame {
         this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
     }
 
-    private void chatListBtnMouseClicked(MouseEvent e) {
+    private void chatListBtnMouseClicked(MouseEvent e) { // 채팅방 목록 화면
         // TODO add your code here
         //chatListBtn.setEnabled(false);
         friendList.setVisible(false);
@@ -330,14 +326,7 @@ public class ChatClientMainView extends JFrame {
         friendHeader.setVisible(false);
         chatListHeader.setVisible(true);
     }
-
-//    private void showFriendListDialog(MouseEvent e) {
-//        // TODO add your code here
-//
-//        SelectFriendDialog selectFriendDialog = new SelectFriendDialog(mainview, addedUserList);
-//        selectFriendDialog.setVisible(true);
-//    }
-
+    
     private void homeBtnMouseClicked(MouseEvent e) { // 홈화면( == 친구 목록 화면)으로 이동
         // TODO add your code here
         friendList.setVisible(true);

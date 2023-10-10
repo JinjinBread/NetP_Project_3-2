@@ -1,5 +1,6 @@
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -28,7 +29,6 @@ public class ChatRoomPanel extends JPanel {
     public Image tmpImg = null;
     public Graphics2D tmpGc;
     public Vector<ChatObject> ChatMsgList = new Vector<>(); // 채팅한 내용 저장.
-    private boolean clicked = false; // 클릭되어 있으면 background 색을 회색으로
 
     public ChatRoomPanel(ChatClientMainView mainview, ImageIcon icon, String name, String userlist, int room_id) {
         initComponents();
@@ -65,6 +65,8 @@ public class ChatRoomPanel extends JPanel {
 //                    temp += String.format(", %s", user);
 //            }
 //        }
+        this.lblLastMsg.setText("New Chatting Room!");
+        this.lblLastTime.setText(getTime(new Date()));
         this.lblChatRoomName.setText(temp);
     }
 
@@ -73,19 +75,17 @@ public class ChatRoomPanel extends JPanel {
         this.Room_Id = room_id;
     }
 
-//    public ChatClientChatRoom getChatRoom(int room_id) {}
-
     public void createChatRoomView() {
         roomview = new ChatClientChatRoomView(mainview, UserName, UserList, Room_Id);
     }
 
     public void paint(Graphics g) {
-        super.paint(g);
         if (tmpImg == null) {
             tmpImg = createImage(lblRoomIcon.getWidth(), lblRoomIcon.getHeight());
             tmpGc = (Graphics2D) tmpImg.getGraphics();
             setChatRoomIcon();
         }
+        super.paint(g);
     }
 
     public void setChatRoomIcon() {
@@ -143,25 +143,17 @@ public class ChatRoomPanel extends JPanel {
         lblRoomIcon.setIcon(new ImageIcon(img));
     }
 
-    public void AppendText(ChatObject cm) {
-        setLastMsg(cm);
-        mainview.AppendText(cm);
-    }
 
-    public void AppendImage(ChatObject cm) {
-        setLastMsg(cm);
-        mainview.AppendImage(cm);
-    }
 
     public void ChangeFriendProfile(ChatObject cm) {
-        mainview.ChangeFriendProfile(cm);
+        roomview.ChangeFriendProfile(cm);
         setChatRoomIcon(); // roomIcon을 update해줌
-        // setSelectFriendIcon(); // SelectFriendDialog icon를 update해줌
     }
 
     public void setLastMsg(ChatObject cm) {
-        LastMsg = cm.data;
-        lblLastMsg.setText(LastMsg);
+        if (cm.code.matches("300"))
+            cm.data = "사진 또는 이모티콘";
+        lblLastMsg.setText(cm.data);
         lblLastTime.setText(getTime(cm.date));
     }
 
@@ -172,10 +164,6 @@ public class ChatRoomPanel extends JPanel {
 
     private void ChatRoomMouseClicked(MouseEvent e) {
         // TODO add your code here
-        if (e.getClickCount() == 1) {
-            // background 색 변경 (우선순위 下)
-
-        }
         // 더블 클릭하면 채팅방 켜짐
         if (e.getClickCount() == 2) {
             roomview.setVisible(true);
@@ -199,16 +187,24 @@ public class ChatRoomPanel extends JPanel {
         });
         setLayout(null);
         add(lblRoomIcon);
-        lblRoomIcon.setBounds(20, 20, 55, 55);
+        lblRoomIcon.setBounds(10, 20, 55, 55);
 
         //---- lblChatRoomName ----
         lblChatRoomName.setFont(lblChatRoomName.getFont().deriveFont(lblChatRoomName.getFont().getStyle() | Font.BOLD, 13f));
         add(lblChatRoomName);
-        lblChatRoomName.setBounds(85, 20, 130, 20);
+        lblChatRoomName.setBounds(85, 25, 130, 20);
+
+        //---- lblLastMsg ----
+        lblLastMsg.setFont(lblLastMsg.getFont().deriveFont(Font.PLAIN, 12f));
+        lblLastMsg.setForeground(new Color(0x999999));
         add(lblLastMsg);
-        lblLastMsg.setBounds(85, 45, 150, 30);
+        lblLastMsg.setBounds(85, 45, 150, 20);
+
+        //---- lblLastTime ----
+        lblLastTime.setForeground(new Color(0x999999));
+        lblLastTime.setFont(lblLastTime.getFont().deriveFont(Font.PLAIN, 10f));
         add(lblLastTime);
-        lblLastTime.setBounds(245, 20, 50, 20);
+        lblLastTime.setBounds(240, 20, 65, 20);
 
         setPreferredSize(new Dimension(309, 95));
         // JFormDesigner - End of component initialization  //GEN-END:initComponents  @formatter:on
